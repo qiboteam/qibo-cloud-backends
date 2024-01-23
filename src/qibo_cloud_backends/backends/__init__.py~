@@ -1,0 +1,2 @@
+from qibo_cloud_backends.backends.qibo_client import QiboClientBackend
+from qibo_cloud_backends.backends.qiskit_client QiskitClientBackend

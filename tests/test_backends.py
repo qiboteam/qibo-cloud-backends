@@ -1,7 +1,8 @@
 from qibo import gates
 from qibo.backends import NumpyBackend
 from qibo.quantum_info import random_clifford
-from qibo_cloud_backends.backends import QiboClientBackend, QiskitClientBackend
+
+from qibo_cloud_backends import QiboClientBackend, QiskitClientBackend
 
 NP_BACKEND = NumpyBackend()
 QISKIT_TK = "qiskit token"
