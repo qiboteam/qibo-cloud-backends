@@ -12,10 +12,14 @@ QIBO_TK = "qibo token"
 def test_qiskit_client_backend():
     c = random_clifford(3, backend=NP_BACKEND)
     c.add(gates.M(0, 2))
-    client = QiskitClientBackend(token=QISKIT_TK, platform="ibm_cloud")
+    client = QiskitClientBackend(
+        token=QISKIT_TK, provider="ibm-q", platform="ibmq_qasm_simulator"
+    )
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
-    NP_BACKEND.assert_allclose(local_res.probabilities(), remote_res.probabilities())
+    NP_BACKEND.assert_allclose(
+        local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(), atol=1e-1
+    )
 
 
 def test_qibo_client_backend():
@@ -24,3 +28,6 @@ def test_qibo_client_backend():
     client = QiboClientBackend(token=QIBO_TK, platform="TII")
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
+    NP_BACKEND.assert_allclose(
+        local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(), atol=1e-1
+    )

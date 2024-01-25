@@ -1,7 +1,10 @@
+import random
+from itertools import repeat
+
 from qibo.backends import NumpyBackend
 from qibo.result import MeasurementOutcomes
 from qiskit import QuantumCircuit
-from qiskit_ibm_runtime import QiskitRuntimeService, Sampler, Session
+from qiskit_ibm_provider import IBMProvider
 
 
 class QiskitClientBackend(NumpyBackend):
@@ -14,18 +17,21 @@ class QiskitClientBackend(NumpyBackend):
         - backend (str): One of the backends supported by the platform.
     """
 
-    def __init__(self, token, platform="ibm_cloud", runcard=None):
+    def __init__(self, token, provider="ibm-q", platform="ibmq_qasm_simulator"):
         super().__init__()
-        self.service = QiskitRuntimeService(channel=platform, token=token)
-        if not runcard:
-            runcard = {"backend": "ibmq_qasm_simulator"}
-        self.backend = runcard["backend"]
+        provider = IBMProvider(token)
+        self.backend = provider.get_backend(platform)
 
-    def execute_circuit(self, circuit, nshots=1000):
+    def execute_circuit(self, circuit, nshots=1000, **kwargs):
         measurements = circuit.measurements
+        nqubits = circuit.nqubits
         circuit = QuantumCircuit.from_qasm_str(circuit.to_qasm())
-        with Session(self.service, backend=self.backend) as session:
-            sampler = Sampler(session=session)
-            job = sampler.run(circuit, shots=nshots)
-            samples = job.result()
-        return MeasurementOutcomes(measurements, samples=samples, nshots=nshots)
+        job = self.backend.run(circuit, shots=nshots, **kwargs)
+        samples = []
+        for state, count in job.result().get_counts().items():
+            sample = [int(bit) for bit in reversed(state)]
+            samples += list(repeat(sample, count))
+        random.shuffle(samples)
+        return MeasurementOutcomes(
+            measurements, backend=self, samples=self.np.asarray(samples), nshots=nshots
+        )
