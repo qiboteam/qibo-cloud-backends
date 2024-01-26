@@ -1,4 +1,3 @@
-import random
 from itertools import repeat
 
 from qibo.backends import NumpyBackend
@@ -37,7 +36,6 @@ class QiskitClientBackend(NumpyBackend):
         for state, count in result.get_counts().items():
             sample = [int(bit) for bit in reversed(state)]
             samples += list(repeat(sample, count))
-        random.shuffle(samples)
         return MeasurementOutcomes(
             measurements, backend=self, samples=self.np.asarray(samples), nshots=nshots
         )
