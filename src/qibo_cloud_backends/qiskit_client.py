@@ -11,10 +11,9 @@ class QiskitClientBackend(NumpyBackend):
     """Backend for the remote execution of Qiskit circuits on the IBM servers.
 
     Args:
-        platform (str): The IBM platform.
         token (str): User authentication token.
-        runcard (dict): A dictionary containing the settings for the execution:
-        - backend (str): One of the backends supported by the platform.
+        provider (str): Name of the IBM service provider.
+        platform (str): The IBM platform.
     """
 
     def __init__(self, token, provider="ibm-q", platform="ibmq_qasm_simulator"):

@@ -11,10 +11,9 @@ class QiboClientBackend(NumpyBackend):
     """Backend for the remote execution of Qibo circuits.
 
     Args:
-        platform (str): The destination client.
+        provider (str): Name of the service provider.
         token (str): User authentication token.
-        runcard (dict): A dictionary containing the settings for the execution:
-        - device (str): One of the devices supported by the platform.
+        platform (str): Name of the platform.
     """
 
     def __init__(self, token, provider="TII", platform="sim"):
