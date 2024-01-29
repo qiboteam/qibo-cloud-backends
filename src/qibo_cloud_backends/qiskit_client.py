@@ -18,14 +18,19 @@ class QiskitClientBackend(NumpyBackend):
 
     def __init__(self, token, provider=None, platform=None):
         super().__init__()
-        if not provider:
+        if provider is None:
             provider = "ibm-q"
-        if not platform:
+        if platform is None:
             platform = "ibmq_qasm_simulator"
         provider = IBMProvider(token)
         self.backend = provider.get_backend(platform)
 
     def execute_circuit(self, circuit, initial_state=None, nshots=1000, **kwargs):
+        if initial_state is not None:
+            raise_error(
+                NotImplementedError,
+                "The use of an `initial_state` is not supported yet.",
+            )
         measurements = circuit.measurements
         if not measurements:
             raise_error(RuntimeError, "No measurement found in the provided circuit.")
