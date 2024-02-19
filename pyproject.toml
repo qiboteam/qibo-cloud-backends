@@ -21,9 +21,10 @@ packages = [{ include = "qibo_cloud_backends", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
-qibo = ">=0.2.2"
+qibo = {git="https://github.com/qiboteam/qibo", branch="client_backends"}
 qibo_client = ">=0.0.1"
 qiskit_ibm_runtime = ">=0.17"
+qiskit_ibm_provider = ">=0.8.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
