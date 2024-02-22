@@ -12,8 +12,8 @@ class QiskitClientBackend(NumpyBackend):
 
     Args:
         token (str): User authentication token.
-        provider (str): Name of the IBM service provider.
-        platform (str): The IBM platform.
+        provider (str): Name of the IBM service provider. Defaults to `"ibm-q"`.
+        platform (str): The IBM platform. Defaults to `"ibmq_qasm_simulator"`.
     """
 
     def __init__(self, token, provider=None, platform=None):
@@ -26,6 +26,16 @@ class QiskitClientBackend(NumpyBackend):
         self.backend = provider.get_backend(platform)
 
     def execute_circuit(self, circuit, initial_state=None, nshots=1000, **kwargs):
+        """Executes the passed circuit.
+
+        Args:
+            circuit (qibo.models.Circuit): The circuit to execute.
+            initial_state (ndarray): The initial state of the circuit. Defaults to `|00...0>`.
+            nshots (int): Total number of shots.
+            kwargs (dict): Additional keyword arguments passed to the qiskit backends' `run()` method.
+        Returns:
+            (qibo.result.MeasurementOutcomes) The outcome of the circuit execution.
+        """
         if initial_state is not None:
             raise_error(
                 NotImplementedError,
