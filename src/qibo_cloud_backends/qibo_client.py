@@ -16,7 +16,7 @@ class QiboClientBackend(NumpyBackend):
         platform (str): Name of the platform.
     """
 
-    def __init__(self, token, provider="TII", platform="sim"):
+    def __init__(self, token, provider=None, platform=None):
         super().__init__()
         if provider is None:
             provider = "TII"
@@ -28,7 +28,7 @@ class QiboClientBackend(NumpyBackend):
                 RuntimeError,
                 f"Unsupported provider {provider}, please pick one in {PROVIDERS_LIST}.",
             )
-        self.client = getattr(qibo_client, self.platform)(token)
+        self.client = getattr(qibo_client, provider)(token)
 
     def execute_circuit(self, circuit, initial_state=None, nshots=1000):
         return self.client.run_circuit(
