@@ -34,5 +34,5 @@ jobs:
       package-manager: "poetry"
       dependency-path: "**/poetry.lock"
       trigger-label: "${{needs.evaluate-label.outputs.label}}"
-      project: qibo-tii-provider
+      project: qibo-cloud-backends
       poetry-extras: --with docs

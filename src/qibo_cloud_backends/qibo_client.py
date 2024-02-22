@@ -23,6 +23,8 @@ class QiboClientBackend(NumpyBackend):
         if platform is None:
             platform = "sim"
         self.platform = platform
+        self.name = "qibo-cloud"
+        self.device = provider
         if provider not in PROVIDERS_LIST:
             raise_error(
                 RuntimeError,
