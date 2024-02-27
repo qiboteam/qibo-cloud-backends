@@ -1,4 +1,5 @@
 import importlib.metadata as im
+import os
 
 from qibo_cloud_backends.qibo_client import QiboClientBackend
 from qibo_cloud_backends.qiskit_client import QiskitClientBackend
@@ -40,7 +41,7 @@ class MetaBackend:
         available_backends = {}
         for worker in WORKERS:
             try:
-                MetaBackend.load(worker=worker, token="")
+                MetaBackend.load(worker=worker, token=os.environ["QIBOCLOUD_TOKEN"])
                 available = True
             except:
                 available = False
