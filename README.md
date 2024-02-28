@@ -9,14 +9,14 @@ Install first the package dependencies with the following commands.
 We recommend to start with a fresh virtual environment to avoid dependencies
 conflicts with previously installed packages.
 
-``` bash
+```bash
    $ python -m venv ./env
    source activate ./env/bin/activate
 ```
 
 The qibo-client-backends package can be installed through pip:
 
-``` bash
+```bash
    pip install qibo-cloud-backends
 ```
 
@@ -29,7 +29,7 @@ received after registration.
 
 Prepare a QFT circuit to be submitted to the servers:
 
-``` python
+```python
    from qibo.models import QFT
    from qibo import gates
 
@@ -39,7 +39,7 @@ Prepare a QFT circuit to be submitted to the servers:
 
 Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
 
-``` python
+```python
 
    from qibo.backends import set_backend
 
@@ -50,7 +50,7 @@ Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
 
 or, in order to use the `ibmq_qasm_simulator` platform on the IBM `ibm-q` server:
 
-``` python
+```python
 
    set_backend("qiskit", token="your_token", provider="ibm-q", platform="ibmq_qasm_simulator")
    result = circuit()
