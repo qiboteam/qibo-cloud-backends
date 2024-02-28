@@ -3,9 +3,6 @@ name: Deploy docs
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    tags:
-      - "*"
 
 jobs:
   evaluate-label:
