@@ -8,10 +8,10 @@ on:
     types: [labeled]
 
 jobs:
+  env:
+    IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
+    QIBO_CLIENT_TII_TOKEN: ${{ secrets.QIBO_CLIENT_TII_TOKEN }}
   build:
-    env:
-      IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
-      QIBO_CLIENT_TII_TOKEN: ${{ secrets.QIBO_CLIENT_TII_TOKEN }}
     if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push'
     strategy:
       matrix:
