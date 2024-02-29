@@ -1,7 +1,7 @@
 name: Tests
-  env:
-    IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
-    QIBO_CLIENT_TII_TOKEN: ${{ secrets.QIBO_CLIENT_TII_TOKEN }}
+env:
+  IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
+  QIBO_CLIENT_TII_TOKEN: ${{ secrets.QIBO_CLIENT_TII_TOKEN }}
 
 on:
   workflow_dispatch:
