@@ -11,13 +11,13 @@ env:
   IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
 
 jobs:
-  print:
+  export_variables:
     runs-on: ubuntu-latest
     steps:
-     - name: echo
+     - name: export
        run: |
-         echo "-----------------------> Checking whether the global variable is correctly set"
-         echo $IBMQ_TOKEN
+         echo "-----------------------> Exporting IBMQ_TOKEN"
+         export IBMQ_TOKEN
   build:
     if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push'
     strategy:
@@ -29,6 +29,5 @@ jobs:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
       poetry-extras: "--with dev"
-    secrets:
-      IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
+    secrets: inherit
       
