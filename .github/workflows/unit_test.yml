@@ -24,7 +24,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: [3.9, '3.10', '3.11']
-    uses: qiboteam/workflows/.github/workflows/rules-poetry.yml@main
+    uses: qiboteam/workflows/.github/workflows/rules-poetry.yml@cloud
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
