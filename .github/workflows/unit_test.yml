@@ -56,7 +56,6 @@ jobs:
         run: |
           source $VENV
           poe test
-      - name: Test documentation examples
       - name: Upload coverage to Codecov
         if: startsWith(runner.os, 'Linux')
         uses: codecov/codecov-action@v3
