@@ -1,7 +1,4 @@
 name: Tests
-env:
-  IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
-  QIBO_CLIENT_TII_TOKEN: ${{ secrets.QIBO_CLIENT_TII_TOKEN }}
 
 on:
   workflow_dispatch:
@@ -17,9 +14,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: [3.9, '3.10', '3.11']
-    uses: qiboteam/workflows/.github/workflows/rules-poetry.yml@main
+    uses: qiboteam/workflows/.github/workflows/rules-poetry.yml@cloud
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
       poetry-extras: "--with dev"
     secrets: inherit
+      
