@@ -29,5 +29,6 @@ jobs:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
       poetry-extras: "--with dev"
-    secrets: inherit
+    secrets:
+      IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
       
