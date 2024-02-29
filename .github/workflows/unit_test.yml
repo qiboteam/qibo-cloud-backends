@@ -11,6 +11,13 @@ env:
   IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
 
 jobs:
+  print:
+    runs-on: ubuntu-latest
+    steps:
+     - name: echo
+       run: |
+         echo "-----------------------> Checking whether the global variable is correctly set"
+         echo $IBMQ_TOKEN
   build:
     if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push'
     strategy:
