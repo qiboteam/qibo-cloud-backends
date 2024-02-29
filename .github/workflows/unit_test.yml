@@ -11,23 +11,59 @@ env:
   IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
 
 jobs:
-  export_variables:
-    runs-on: ubuntu-latest
-    steps:
-     - name: export
-       run: |
-         echo "-----------------------> Exporting IBMQ_TOKEN"
-         export IBMQ_TOKEN
   build:
     if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: [3.9, '3.10', '3.11']
-    uses: qiboteam/workflows/.github/workflows/rules-poetry.yml@main
-    with:
-      os: ${{ matrix.os }}
-      python-version: ${{ matrix.python-version }}
-      poetry-extras: "--with dev"
-    secrets: inherit
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install and configure poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Disable modern installer
+        run: poetry config installer.modern-installation false
+      - name: Load cached venv
+        id: cached-pip-wheels
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Install project
+        run: poetry install --no-interaction "--with dev"
+      - name: Install task runner
+        run: pip install poethepoet
+      - name: Lint
+        run: |
+          source $VENV
+          poe lint
+          poe lint-warnings
+      - name: Test
+        run: |
+          source $VENV
+          poe test
+      - name: Test documentation examples
+      - name: Upload coverage to Codecov
+        if: startsWith(runner.os, 'Linux')
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: unit-tests
+          fail_ci_if_error: true
+          token: ${{ secrets.codecov_token }}
       
