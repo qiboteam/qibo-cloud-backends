@@ -1,4 +1,5 @@
 import os
+os.environ.setdefault("QRCCLUSTER_PORT", "8080")
 
 from qibo import gates
 from qibo.backends import NumpyBackend
