@@ -39,7 +39,7 @@ nbsphinx = "^0.9.3"
 furo = "^2023.9.10"
 
 [tool.poe.tasks]
-test = "pytest"
+test = "pytest -s"
 lint = "pylint --errors-only src"
 lint-warnings = "pylint --exit-zero src"
 docs = "make -C doc html"

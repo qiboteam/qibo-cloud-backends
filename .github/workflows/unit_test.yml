@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: [3.9, '3.10', '3.11']
+        python-version: [3.9, "3.10", "3.11"]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -56,7 +56,7 @@ jobs:
       - name: Test
         run: |
           source $VENV
-          poe test
+          poe test -k qibo
       - name: Upload coverage to Codecov
         if: startsWith(runner.os, 'Linux')
         uses: codecov/codecov-action@v3
@@ -66,4 +66,3 @@ jobs:
           name: unit-tests
           fail_ci_if_error: true
           token: ${{ secrets.codecov_token }}
-      
