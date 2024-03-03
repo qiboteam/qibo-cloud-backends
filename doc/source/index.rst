@@ -70,3 +70,15 @@ API Reference
    :caption: Contents:
 
    backends
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Documentation links
+
+    Qibo docs <https://qibo.science/qibo/stable/>
+    Qibolab docs <https://qibo.science/qibolab/stable/>
+    Qibocal docs <https://qibo.science/qibocal/stable/>
+    Qibosoq docs <https://qibo.science/qibosoq/stable/>
+    Qibochem docs <https://qibo.science/qibochem/stable/>
+    Qibotn docs <https://qibo.science/qibotn/stable/>
+    Qibo-cloud-backends docs <https://qibo.science/qibo-cloud-backends/stable/>
