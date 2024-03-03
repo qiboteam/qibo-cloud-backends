@@ -50,7 +50,6 @@ test-docs = "make -C doc doctest"
 output-format = "colorized"
 
 [tool.pytest.ini_options]
-log_cli = true
 testpaths = ['tests/']
 filterwarnings = ['ignore::RuntimeWarning']
 addopts = [
