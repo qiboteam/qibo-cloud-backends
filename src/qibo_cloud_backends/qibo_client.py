@@ -1,7 +1,3 @@
-import os
-
-os.environ.setdefault("QRCCLUSTER_PORT", "8080")
-
 import qibo_client
 from qibo.backends import NumpyBackend
 from qibo.config import raise_error
