@@ -1,5 +1,7 @@
 import os
 
+os.environ.setdefault("QRCCLUSTER_PORT", "8080")
+
 import qibo_client
 from qibo.backends import NumpyBackend
 from qibo.config import raise_error
@@ -20,7 +22,6 @@ class QiboClientBackend(NumpyBackend):
 
     def __init__(self, token, provider=None, platform=None):
         super().__init__()
-        os.environ.setdefault("QRCCLUSTER_PORT", "8080")
         if provider is None:
             provider = "TII"
         if platform is None:
