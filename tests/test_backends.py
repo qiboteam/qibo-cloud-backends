@@ -1,5 +1,4 @@
 import os
-os.environ.setdefault("QRCCLUSTER_PORT", "8080")
 
 from qibo import gates
 from qibo.backends import NumpyBackend
@@ -32,5 +31,7 @@ def test_qibo_client_backend():
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
     NP_BACKEND.assert_allclose(
-        local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(qubits=[0, 2]), atol=1e-1
+        local_res.probabilities(qubits=[0, 2]),
+        remote_res.probabilities(qubits=[0, 2]),
+        atol=1e-1,
     )
