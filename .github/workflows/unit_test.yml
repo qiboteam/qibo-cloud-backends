@@ -56,7 +56,6 @@ jobs:
       - name: Test
         run: |
           source $VENV
-          export QRCCLUSTER_PORT=8080
           poe test
       - name: Upload coverage to Codecov
         if: startsWith(runner.os, 'Linux')
