@@ -7,9 +7,7 @@ import importlib.util
 import sys
 
 # names of aws module requirements, dict for whether module is importable
-# names = {'braket': False, 'boto3': False, 'awscli': False}
 names = {'braket': False}
-# whether aws requirements are installed
 AWS_REQUIREMENTS = False
 
 error_messages = []
@@ -34,7 +32,7 @@ if any(value == False for name, value in names.items()):
     print(f'The required module is not installed\n\n{error_message}')
 else:
     from braket.aws import AwsDevice, AwsQuantumTask
-    # from braket.circuits import Circuit, Gate, observables
+    from braket.circuits import Circuit, Gate, observables
     from braket.circuits import Circuit
     # from braket.device_schema import DeviceActionType
     from braket.devices import Devices, LocalSimulator
@@ -64,7 +62,50 @@ if AWS_REQUIREMENTS:
             modified_code = re.sub(r'include\s+"qelib1.inc";\n', '', qasm_string)
             return modified_code
 
-        def execute_aws_circuit(self, circuit, initial_state=None, nshots=1000, topology=None, **kwargs):
+        def qasm_convert_gates(self, qasm_code):
+            # To replace the notation for certain gates in OpenQASM
+            # To add more gates if necessary
+            lines = qasm_code.split('\n')
+            modified_code = ""
+            for line in lines:
+                if "id" in line:
+                    modified_code += line.replace("id", "i") + '\n'
+                elif "cx" in line:
+                    modified_code += line.replace("cx", "cnot") + '\n'
+                elif "sx" in line:
+                    modified_code += line.replace("sx", "v") + '\n'
+                elif "sdg" in line:
+                    modified_code += line.replace("sdg", "si") + '\n'
+                elif "tdg" in line:
+                    modified_code += line.replace("tdg", "ti") + '\n'
+                else:
+                    modified_code += line + '\n'
+            return modified_code
+
+        def insert_verbatim_box(self, qasm_code):
+            lines = qasm_code.split('\n')
+            modified_code = ""
+        
+            register_index = -1
+            measure_index = -1
+        
+            for i, line in enumerate(lines):
+                if "creg register" in line:
+                    register_index = i
+                if "measure" in line and measure_index == -1:
+                    measure_index = i
+        
+            for i, line in enumerate(lines):
+                if i == register_index:
+                    modified_code += line + "\n#pragma braket verbatim\nbox{\n"
+                elif i == measure_index:
+                    modified_code += "}\n" + line + "\n"
+                else:
+                    modified_code += line + '\n'
+        
+            return modified_code
+            
+        def execute_aws_circuit(self, circuit, initial_state=None, nshots=1000, topology=None, verbatim_circuit=False, **kwargs):
             """Executes the passed circuit.
 
             Args:
@@ -92,18 +133,21 @@ if AWS_REQUIREMENTS:
                     NotImplementedError,
                     "The use of additional arguments to `run()` is not supported yet.",
                 )
+            
             measurements = circuit.measurements
             if not measurements:
                 raise_error(RuntimeError, "No measurement found in the provided circuit.")
             nqubits = circuit.nqubits
             circuit_qasm = circuit.to_qasm()
             qasm_program = self.remove_qelib1_inc(circuit_qasm)
-            # Check the compatibility of openqasm gates with aws-braket.
-            # Do a gate-to-gate translation to braket.
+            print(qasm_program)
+            qasm_program = self.qasm_convert_gates(qasm_program)
+            print('\n', qasm_program)
+            if verbatim_circuit is True:
+                qasm_program = self.insert_verbatim_box(qasm_program)
             qasm_program = Program(source = qasm_program)
             result = self.device.run(qasm_program, shots=nshots).result()
             samples = result.measurements
-
             return MeasurementOutcomes(
                 measurements=measurements, backend=self, samples=samples, nshots=nshots
             )
