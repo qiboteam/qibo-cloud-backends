@@ -65,21 +65,21 @@ if AWS_REQUIREMENTS:
         def qasm_convert_gates(self, qasm_code):
             # To replace the notation for certain gates in OpenQASM
             # To add more gates if necessary
+            dict = {
+                "id": "i",
+                "cx": "cnot",
+                "sx": "v",
+                "sdg": "si",
+                "tdg": "ti",
+            }
             lines = qasm_code.split('\n')
             modified_code = ""
             for line in lines:
-                if "id" in line:
-                    modified_code += line.replace("id", "i") + '\n'
-                elif "cx" in line:
-                    modified_code += line.replace("cx", "cnot") + '\n'
-                elif "sx" in line:
-                    modified_code += line.replace("sx", "v") + '\n'
-                elif "sdg" in line:
-                    modified_code += line.replace("sdg", "si") + '\n'
-                elif "tdg" in line:
-                    modified_code += line.replace("tdg", "ti") + '\n'
-                else:
-                    modified_code += line + '\n'
+                for key in dict:
+                    if key in line:
+                        line = line.replace(key, dict[key])
+                        break
+                modified_code += line + '\n'
             return modified_code
 
         def insert_verbatim_box(self, qasm_code):
@@ -88,13 +88,15 @@ if AWS_REQUIREMENTS:
         
             register_index = -1
             measure_index = -1
-        
+            
+            # This loop is to find the line indices to start and close the verbatim box.
             for i, line in enumerate(lines):
                 if "creg register" in line:
                     register_index = i
                 if "measure" in line and measure_index == -1:
                     measure_index = i
         
+            # Use previously found indices to start and close the verbatim box.
             for i, line in enumerate(lines):
                 if i == register_index:
                     modified_code += line + "\n#pragma braket verbatim\nbox{\n"
@@ -105,7 +107,7 @@ if AWS_REQUIREMENTS:
         
             return modified_code
             
-        def execute_aws_circuit(self, circuit, initial_state=None, nshots=1000, topology=None, verbatim_circuit=False, **kwargs):
+        def execute_aws_circuit(self, circuit, initial_state=None, nshots=1000, verbatim_circuit=False, **kwargs):
             """Executes the passed circuit.
 
             Args:
@@ -121,13 +123,6 @@ if AWS_REQUIREMENTS:
                     NotImplementedError,
                     "The use of an `initial_state` is not supported yet.",
                 )
-            if topology is not None:
-                raise_error(
-                    NotImplementedError,
-                    "The use of topology of qubits is not supported yet.",
-                )
-                # To be done with verbatim circuits.
-                # Check verbatim circuits.
             if kwargs:
                 raise_error(
                     NotImplementedError,
@@ -140,9 +135,7 @@ if AWS_REQUIREMENTS:
             nqubits = circuit.nqubits
             circuit_qasm = circuit.to_qasm()
             qasm_program = self.remove_qelib1_inc(circuit_qasm)
-            print(qasm_program)
             qasm_program = self.qasm_convert_gates(qasm_program)
-            print('\n', qasm_program)
             if verbatim_circuit is True:
                 qasm_program = self.insert_verbatim_box(qasm_program)
             qasm_program = Program(source = qasm_program)
