@@ -25,7 +25,7 @@ qibo = ">=0.2.4"
 qibo_client = ">=0.0.3"
 qiskit_ibm_runtime = ">=0.17"
 qiskit_ibm_provider = ">=0.8.0"
-amazon-braket-sdk = "^1.76.0"
+amazon-braket-sdk = { version = "^1.77.3", optional = true }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"
@@ -39,10 +39,12 @@ sphinx-copybutton = "^0.5.2"
 nbsphinx = "^0.9.3"
 furo = "^2023.9.10"
 
-
 [tool.poetry.group.dev.dependencies]
 ipython = "^7"
 pdbpp = "^0.10.3"
+
+[tool.poetry.extras]
+aws = ["amazon-braket-sdk"]
 
 [tool.poe.tasks]
 test = "pytest"
