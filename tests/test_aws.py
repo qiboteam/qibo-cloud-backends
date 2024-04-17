@@ -19,7 +19,7 @@ def test_aws_client_backend():
     # AWS = aws_client.AWSClientBackend(device = AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1"))
 
     local_res = NP_BACKEND.execute_circuit(circuit_qibo)
-    remote_res = client.execute_aws_circuit(circuit_qibo)
+    remote_res = client.execute_circuit(circuit_qibo)
 
     NP_BACKEND.assert_allclose(
         local_res.probabilities(qubits=[0, 2]),
