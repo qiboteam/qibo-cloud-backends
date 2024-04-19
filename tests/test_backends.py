@@ -1,8 +1,14 @@
+import pytest
 from qibo import gates
-from qibo.backends import NumpyBackend
+from qibo.backends import (
+    GlobalBackend,
+    NumpyBackend,
+    list_available_backends,
+    set_backend,
+)
 from qibo.quantum_info import random_clifford
 
-from qibo_cloud_backends import QiboClientBackend, QiskitClientBackend
+from qibo_cloud_backends import MetaBackend, QiboClientBackend, QiskitClientBackend
 
 NP_BACKEND = NumpyBackend()
 QISKIT_TK = "qiskit token"
@@ -31,3 +37,24 @@ def test_qibo_client_backend():
     NP_BACKEND.assert_allclose(
         local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(), atol=1e-1
     )
+
+
+@pytest.mark.parametrize(
+    "backend,token", [("qibo-client", QIBO_TK), ("qiskit-client", QISKIT_TK)]
+)
+def test_set_backend(backend, token):
+    set_backend("qibo-cloud-backends", worker=backend, token=token)
+    assert isinstance(GlobalBackend(), MetaBackend.load(backend).__class__)
+
+
+def test_list_available_backends():
+    available_backends = {
+        "numpy": True,
+        "tensorflow": True,
+        "pytorch": True,
+        "qibojit": False,
+        "qibolab": False,
+        "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
+        "qibotn": False,
+    }
+    assert list_available_backends() == available_backends

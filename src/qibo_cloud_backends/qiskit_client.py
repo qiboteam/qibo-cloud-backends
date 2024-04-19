@@ -23,7 +23,7 @@ class QiskitClientBackend(NumpyBackend):
         if platform is None:
             platform = "ibmq_qasm_simulator"
         self.platform = platform
-        self.name = "qiskit"
+        self.name = "qiskit-client"
         self.device = provider
         provider = IBMProvider(token)
         self.backend = provider.get_backend(platform)
