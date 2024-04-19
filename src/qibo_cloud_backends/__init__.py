@@ -23,7 +23,7 @@ class MetaBackend:
         """Loads the backend.
 
         Args:
-            platform (str): Name of the backend to load: either `numba`, `cupy` or `cuquantum`.
+            platform (str): Name of the backend to load, one in ("qibo-client", "qiskit-client").
         Returns:
             qibo.backends.abstract.Backend: The loaded backend.
         """
