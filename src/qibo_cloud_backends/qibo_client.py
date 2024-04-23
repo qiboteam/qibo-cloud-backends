@@ -46,4 +46,6 @@ class QiboClientBackend(NumpyBackend):
         Returns:
             (qibo.result) The qibo result object containing the outcome of the circuit execution.
         """
-        return self.client.run_circuit(circuit, nshots=nshots, device=self.platform)
+        return self.client.run_circuit(
+            circuit, nshots=int(nshots), device=self.platform
+        )
