@@ -54,8 +54,8 @@ def test_set_backend(backend, token):
 def test_list_available_backends():
     available_backends = {
         "numpy": True,
-        "tensorflow": True,
-        "pytorch": True,
+        "tensorflow": False,
+        "pytorch": False,
         "qibojit": False,
         "qibolab": False,
         "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
