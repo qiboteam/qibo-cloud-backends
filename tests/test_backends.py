@@ -1,6 +1,6 @@
-import pytest
 import os
 
+import pytest
 from qibo import gates
 from qibo.backends import (
     GlobalBackend,
@@ -48,7 +48,7 @@ def test_qibo_client_backend():
 )
 def test_set_backend(backend, token):
     set_backend("qibo-cloud-backends", worker=backend, token=token)
-    assert isinstance(GlobalBackend(), MetaBackend.load(backend).__class__)
+    assert isinstance(GlobalBackend(), MetaBackend.load(backend, token=token).__class__)
 
 
 def test_list_available_backends():
