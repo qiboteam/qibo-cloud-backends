@@ -50,7 +50,7 @@ Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
 
    from qibo.backends import set_backend
 
-   set_backend("qibo-cloud", token="your_token", provider="TII", platform="sim")
+   set_backend("qibo-cloud-backends", worker="qibo-client", token="your_token", provider="TII", platform="sim")
    result = circuit()
    print(result.frequencies())
 
@@ -58,7 +58,7 @@ or, in order to use the `ibmq_qasm_simulator` platform on the IBM `ibm-q` server
 
 .. code-block:: python
 
-   set_backend("qiskit", token="your_token", provider="ibm-q", platform="ibmq_qasm_simulator")
+   set_backend("qibo-cloud-backends", worker="qiskit-client", token="your_token", provider="ibm-q", platform="ibmq_qasm_simulator")
    result = circuit()
    print(result.frequencies())
 
