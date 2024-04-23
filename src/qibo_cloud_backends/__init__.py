@@ -12,6 +12,7 @@ __version__ = im.version(__package__)
 QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend]
 
 WORKERS = ("qibo-client", "qiskit-client")
+TOKENS = ("QIBO_CLIENT_TII_TOKEN", "IBMQ_TOKEN")
 
 
 class MetaBackend:
@@ -42,9 +43,9 @@ class MetaBackend:
     def list_available(self) -> dict:
         """Lists all the available qibocloud backends."""
         available_backends = {}
-        for worker in WORKERS:
+        for worker, token in zip(WORKERS, TOKENS):
             try:
-                MetaBackend.load(worker=worker, token=os.environ["QIBOCLOUD_TOKEN"])
+                MetaBackend.load(worker=worker, token=os.environ[token])
                 available = True
             except:
                 available = False

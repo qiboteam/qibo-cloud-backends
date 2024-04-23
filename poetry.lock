@@ -1794,7 +1794,7 @@ torch = ["torch (>=2.1.1,<3.0.0)"]
 type = "git"
 url = "https://github.com/qiboteam/qibo.git"
 reference = "list_backends"
-resolved_reference = "1f2b23c8d305a38b5d789d34dd52575283bd7792"
+resolved_reference = "f43a6a1a7eea95c0da1ecb65a9c6d346ecfe0a0a"
 
 [[package]]
 name = "qibo-client"
