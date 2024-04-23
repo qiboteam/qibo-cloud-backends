@@ -1,5 +1,6 @@
 import importlib.metadata as im
 import os
+from typing import Union
 
 from qibo.config import raise_error
 
@@ -8,7 +9,7 @@ from qibo_cloud_backends.qiskit_client import QiskitClientBackend
 
 __version__ = im.version(__package__)
 
-QibocloudBackend = QiboClientBackend | QiskitClientBackend
+QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend]
 
 WORKERS = ("qibo-client", "qiskit-client")
 
