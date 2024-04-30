@@ -29,7 +29,7 @@ _QASM_BRAKET_GATES = {
     "tdg": "ti",
 }
 
-class BraketBackend(NumpyBackend):
+class BraketClientBackend(NumpyBackend):
     """Backend for the remote execution of AWS circuits on the AWS backends.
 
     Args:
