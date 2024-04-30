@@ -97,14 +97,10 @@ class BraketClientBackend(NumpyBackend):
                         circuit,
                         nshots=1000):
         """Executes a circuit (Qibo or Qibo-transpiled-to-Braket) on an AWS Braket device. The device defaults to the LocalSimulator().
-           This function allows the user to opt for verbatim_circuit on the device by indicating `verbatim_circuit=True`.
             
-
         Args:
             circuit (quantum circuit): Either qibo.models.Circuit or braket.circuits.Circuit to execute on the Braket device.
             nshots (int): Total number of shots.
-            verbatim_circuit (bool): If `True`, wrap the Braket circuit in a verbatim box to run it on the QPU without any transpilation.
-                Defaults to `False`.
 
         Returns:
             Measurement outcomes (qibo.measurement.MeasurementOutcomes): The outcome of the circuit execution.
