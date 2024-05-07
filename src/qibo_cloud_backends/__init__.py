@@ -16,7 +16,7 @@ TOKENS = ("QIBO_CLIENT_TII_TOKEN", "IBMQ_TOKEN")
 
 
 class MetaBackend:
-    """Meta-backend class which takes care of loading the qibojit backends."""
+    """Meta-backend class which takes care of loading the qibo-cloud backends."""
 
     @staticmethod
     def load(
