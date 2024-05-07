@@ -1,10 +1,5 @@
 import importlib.metadata as im
 import os
-<<<<<<< HEAD
-from typing import Union
-
-=======
->>>>>>> f7879de (fix: small fixes)
 from typing import Union
 
 from qibo.config import raise_error
