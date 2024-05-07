@@ -49,6 +49,7 @@ def test_qibo_client_backend():
 def test_set_backend(backend, token):
     set_backend("qibo-cloud-backends", worker=backend, token=token)
     assert isinstance(GlobalBackend(), MetaBackend.load(backend, token=token).__class__)
+    assert GlobalBackend().name == backend
 
 
 def test_list_available_backends():

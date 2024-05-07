@@ -2,6 +2,8 @@ import importlib.metadata as im
 import os
 from typing import Union
 
+from typing import Union
+
 from qibo.config import raise_error
 
 from qibo_cloud_backends.qibo_client import QiboClientBackend
@@ -25,7 +27,10 @@ class MetaBackend:
         """Loads the backend.
 
         Args:
-            platform (str): Name of the backend to load, one in ("qibo-client", "qiskit-client").
+            worker (str): Name of the backend to load, one in ("qibo-client", "qiskit-client").
+            token (str): User token for the remote connection.
+            provider (str): Name of the provider of the service, e.g. `ibm-q` for IBM.  
+            platform (str): Name of the platform to connect to on the provider's servers, e.g. `ibmq_qasm_simulator` for IBM.
         Returns:
             qibo.backends.abstract.Backend: The loaded backend.
         """
@@ -40,12 +45,15 @@ class MetaBackend:
                 f"Unsupported worker, please use one among {WORKERS}.",
             )
 
-    def list_available(self) -> dict:
+    def list_available(self, tokens: dict=None) -> dict:
         """Lists all the available qibocloud backends."""
+        if tokens is None:
+            tokens = {}
         available_backends = {}
         for worker, token in zip(WORKERS, TOKENS):
             try:
-                MetaBackend.load(worker=worker, token=os.environ[token])
+                token = tokens.get(worker, os.environ[f"{worker.replace('-', '_').upper()}_TOKEN"])
+                MetaBackend.load(worker=worker, token=token)
                 available = True
             except:
                 available = False
