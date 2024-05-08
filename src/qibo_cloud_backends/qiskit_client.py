@@ -12,6 +12,11 @@ from qiskit_ibm_runtime import SamplerV2 as Sampler, QiskitRuntimeService
 import qiskit_ibm_runtime.fake_provider as fake_provider
 from qiskit.transpiler import CouplingMap
 
+from qiskit_aer import AerSimulator
+import qiskit_aer.noise as Noise
+from qiskit_aer.noise import (NoiseModel, QuantumError, ReadoutError, kraus_error,
+    pauli_error, depolarizing_error, thermal_relaxation_error, amplitude_damping_error)
+
 import re
 
 class QiskitClientBackend(NumpyBackend):
@@ -21,12 +26,19 @@ class QiskitClientBackend(NumpyBackend):
         token (str): User authentication token.
         provider (str): Name of the IBM service provider. Defaults to `"BasicProvider()"`.
         platform (str): The IBM platform. Defaults to `"basic_simulator"`.
+        noisetype (str): String to identify noise type, e.g. "depolarizing_error", "amplitude_damping_error", etc.
+        noiselevel (float): Noise level representing the probability of error, between 0 and 1.
+        KrausOperators (list): To specify the noise exactly using Kraus Operators.
+            E.g. Specifying the Kraus Operators for amplitude damping error:
+                    K0 = np.array([[1, 0], [0, np.sqrt(1 - noiselevel)]])
+                    K1 = np.array([[0, np.sqrt(noiselevel)], [0, 0]])
+                    KrausOperators = [K0, K1]
         basis_gates (list, str): List of basis gates for the IBM platform. e.g. ['ECR', 'id', 'rz', 'sx', 'x']
         coupling_map (list, list): List of coupling map (not tested yet, dependent on platform)
         optimization_level (int): 0 for no optimization, 3 for maximum optimization. Defaults to 1.
     """
     
-    def __init__(self, token=None, provider=None, platform=None, basis_gates=None, coupling_map=None, optimization_level=1):
+    def __init__(self, token=None, provider=None, platform=None, noisetype=None, noiselevel=None, KrausOperators=None, basis_gates=None, coupling_map=None, optimization_level=1):
         super().__init__()
         # if token=None default to backend = BasicProvider().get_backend("basic_simulator")
         # elif: backend = fake_provider.FakeProvider
@@ -36,6 +48,24 @@ class QiskitClientBackend(NumpyBackend):
             provider = BasicProvider()
             platform = "basic_simulator"
             self.backend = provider.get_backend(platform)
+        
+        elif provider == "aer_simulator":
+            if KrausOperators is None and noisetype is not None:
+                if noiselevel is None:
+                    raise_error(ValueError, "Need to specify noise level.")
+                elif noiselevel < 0 or noiselevel > 1:
+                    raise_error(ValueError, "Noise level needs to be between 0 and 1.")
+                error = getattr(Noise, noisetype)(noiselevel)
+            elif KrausOperators is not None and noisetype is None:
+                error = kraus_error(KrausOperators)
+            else:
+                raise_error(ValueError, "Need to specify noise type / Kraus operators.")
+            
+            noise_model = NoiseModel()
+            noise_model.add_all_qubit_quantum_error(error, ['h', 'id', 'x', 'y', 'z', 'rx', 'ry', 'rz', 'u1', 'u2', 'u3'])
+            basis_gates = noise_model.basis_gates
+            self.backend = AerSimulator(noise_model=noise_model, basis_gates=basis_gates)
+        
         elif provider == "fake_provider":
             provider = fake_provider
             backend = getattr(fake_provider, platform)()
@@ -43,8 +73,6 @@ class QiskitClientBackend(NumpyBackend):
         else:
             self.backend = provider.get_backend(platform)
         self.platform = platform
-
-        self.name = "qiskit"
 
         if optimization_level < 0 or optimization_level > 3:
             raise_error(ValueError, "optimization level needs to be between 0 to 3, inclusive of 0 and 3.")
@@ -54,6 +82,9 @@ class QiskitClientBackend(NumpyBackend):
             self.coupling_map = CouplingMap(coupling_map)
         if basis_gates is not None:
             self.basis_gates = basis_gates
+
+        self.provider = provider
+        self.name = "qiskit"
 
     def convert_counts_to_bin_keys(self, qc, counts):
         """To convert the keys in the count_dictionary into binary.
@@ -115,9 +146,9 @@ class QiskitClientBackend(NumpyBackend):
 
         # Convert Qibo circuit --> OpenQASM --> Qiskit circuit
         circuit = qiskit.qasm2.loads(self.register0_to_meas(circuit_qibo.to_qasm()))
-
-        if self.platform == "basic_simulator":
-            print('BASIC SIMULATOR')
+        
+        if self.platform == "basic_simulator" or self.provider == "aer_simulator":
+            print('BASIC SIMULATOR or AER SIMULATOR')
             # Don't need to perform transpilation.
             
             # Use backend.run() to generate counts.
