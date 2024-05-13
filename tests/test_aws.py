@@ -10,7 +10,10 @@ NP_BACKEND = NumpyBackend()
 
 def test_aws_client_backend():
     circuit_qibo = random_clifford(3, backend=NP_BACKEND)
-    circuit_qibo.add(gates.M(0, 2))
+    circuit_qibo.add(gates.M(0))
+    circuit_qibo.add(gates.M(1))
+    circuit_qibo.add(gates.M(2))
+    
 
     # Local simulator test, does not cost money
     client = aws_client.AWSClientBackend()
