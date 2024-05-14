@@ -254,9 +254,9 @@ class BraketClientBackend(NumpyBackend):
             raise_error(ValueError, "Optimization_level is between 0 to 3.")
         else:
             self.optimization_level = optimization_level
-        if custom_coupling_map is None:
+        if self.coupling_map is None:
             raise_error(ValueError, "Expected custom_coupling_map. E.g. custom_coupling_map = [[0, 1], [1, 2], [2, 3]]")
-        if native_gates is None:
+        if self.native_gates is None:
             raise_error(ValueError, "Expected native gates for transpilation. E.g. native_gates = ['ecr', 'i', 'rz', 'sx', 'x']")
 
         circuit_qasm = circuit_qibo.to_qasm()
@@ -285,6 +285,7 @@ class BraketClientBackend(NumpyBackend):
         Returns:
             Measurement outcomes (qibo.measurement.MeasurementOutcomes): The outcome of the circuit execution.
         """
+        
         measurements = circuit.measurements
         if not measurements:
             raise_error(RuntimeError, "No measurement found in the provided circuit.")
