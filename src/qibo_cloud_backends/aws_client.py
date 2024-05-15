@@ -21,10 +21,14 @@ from qiskit.transpiler import CouplingMap
 from qiskit.circuit.random import random_circuit
 from qiskit import qasm2
 
+from qiskit_braket_provider import to_braket as qiskit_to_braket
+
 from braket.aws import AwsDevice, AwsQuantumTask
 from braket.circuits import Gate, observables
 from braket.circuits import Circuit as BraketCircuit
 from braket.devices import Devices, LocalSimulator
+
+from qibo_cloud_backends.translate import to_braket
 
 _QASM_BRAKET_GATES = {
     "id": "i",
@@ -37,21 +41,21 @@ _QASM_BRAKET_GATES = {
 }
 
 class BraketClientBackend(NumpyBackend):
-    """Backend for the remote execution of AWS circuits on the AWS backends.
-
-    Args:
-        device (str): The ARN of the Braket device. Defaults to Braket's statevector LocalSimulator, LocalSimulator("default").
-                      Other devices are Braket's density matrix simulator, LocalSimulator("braket_dm"), or any other
-                      QPUs.
-        verbatim_circuit (bool): If `True`, wrap the Braket circuit in a verbatim box to run it on the QPU
-                                 without any transpilation. Defaults to `False`.
-        transpilation (bool): If `True`, check for two additional arguments: native_gates and coupling_map.
-        native_gates: - For qibo transpiler:   (list, qibo.gates): e.g. [gates.I, gates.RZ, gates.SX, gates.X, gates.ECR]
-                      - For qiskit transpiler: (list, str):        e.g. ['ecr', 'i', 'rz', 'sx', 'x']
-        coupling_map (list, list): E.g. [[0, 1], [0, 7], [1, 2], [2, 3], [4, 3], [4, 5], [6, 5], [7, 6]]
-    """
 
     def __init__(self, device=None, verbatim_circuit=False, transpilation=False, native_gates=None, coupling_map=None):
+        """Backend for the remote execution of AWS circuits on the AWS backends.
+
+        Args:
+            device (str): The ARN of the Braket device. Defaults to Braket's statevector LocalSimulator, LocalSimulator("default").
+                          Other devices are Braket's density matrix simulator, LocalSimulator("braket_dm"), or any other
+                          QPUs.
+            verbatim_circuit (bool): If `True`, wrap the Braket circuit in a verbatim box to run it on the QPU
+                                     without any transpilation. Defaults to `False`.
+            transpilation (bool): If `True`, check for two additional arguments: native_gates and coupling_map.
+            native_gates: - For qibo transpiler:   (list, qibo.gates): e.g. [gates.I, gates.RZ, gates.SX, gates.X, gates.ECR]
+                          - For qiskit transpiler: (list, str):        e.g. ['ecr', 'i', 'rz', 'sx', 'x']
+            coupling_map (list, list): E.g. [[0, 1], [0, 7], [1, 2], [2, 3], [4, 3], [4, 5], [6, 5], [7, 6]]
+        """
         super().__init__()
         
         self.verbatim_circuit = verbatim_circuit
@@ -68,47 +72,11 @@ class BraketClientBackend(NumpyBackend):
             else:
                 self.native_gates = native_gates
 
-        
-        if device is None:
-            self.device = LocalSimulator("default")
-            # self.device = LocalSimulator("braket_dm")
-        else:
-            self.device = device
+        self.device = AwsDevice(device) if device else LocalSimulator()
         self.name = "aws"
 
-    def remove_qelib1_inc(self, qasm_string):
-        """To remove the 'includes qe1lib.inc' from the OpenQASM string.
-
-        Args: 
-            qasm_code (OpenQASM circuit, str): circuit given in the OpenQASM format.
-        Returns:
-            qasm_code (OpenQASM circuit, str): circuit given in the OpenQASM format.
-        """
-        
-        # Remove the "include "qelib1.inc";\n" line
-        modified_code = re.sub(r'include\s+"qelib1.inc";\n', '', qasm_string)
-        return modified_code
-    
-    def qasm_convert_gates(self, qasm_code):
-        """To replace the notation for certain gates in OpenQAS.
-
-        Args: 
-            qasm_code (OpenQASM circuit, str): circuit given in the OpenQASM format.
-        Returns:
-            qasm_code (OpenQASM circuit, str): circuit given in the OpenQASM format.
-        """
-        
-        lines = qasm_code.split('\n')
-        modified_code = ""
-        for line in lines:
-            for key in _QASM_BRAKET_GATES:
-                if key in line:
-                    line = line.replace(key, _QASM_BRAKET_GATES[key])
-                    break
-            modified_code += line + '\n'
-        return modified_code
-
-    def custom_connectivity(self, coupling_map):
+    @staticmethod
+    def custom_connectivity(coupling_map):
         """Converts a coupling map given in list form to a networkx graph. Returns networkx graph.
     
         Args:
@@ -195,7 +163,7 @@ class BraketClientBackend(NumpyBackend):
         transpiled_circuit_qasm = qasm2.dumps(transpiled_circuit) # Convert back to qasm.
         return transpiled_circuit_qasm
 
-    def transpile_qibo_to_braket_with_qiskit(self, circuit_qibo, optimization_level=1):
+    def transpile_qibo_to_braket_with_qiskit(self, circuit_qibo, native_gates, custom_coupling_map, optimization_level=1):
         """Transpiles a Qibo circuit using Qiskit's transpiler. Returns a Braket circuit.
     
         Args:
@@ -227,10 +195,7 @@ class BraketClientBackend(NumpyBackend):
                                        basis_gates = self.native_gates,
                                        optimization_level = self.optimization_level,
                                        coupling_map = self.coupling_map)
-        transpiled_circuit_qasm = qasm2.dumps(transpiled_circuit) # Convert back to qasm.
-        transpiled_circuit_qasm = self.remove_qelib1_inc(transpiled_circuit_qasm)
-        transpiled_circuit_qasm = self.qasm_convert_gates(transpiled_circuit_qasm)
-        braket_circuit = BraketCircuit.from_ir(transpiled_circuit_qasm)
+        braket_circuit = qiskit_to_braket(transpiled_circuit, verbatim=True)
         return braket_circuit
 
     def transpile_qibo_to_qibo_with_qiskit(self, circuit_qibo, optimization_level=1):
@@ -238,10 +203,6 @@ class BraketClientBackend(NumpyBackend):
     
         Args:
             circuit_qibo (qibo.models.Circuit): Qibo circuit to transpile.
-            native_gates (list, str): A list of strings representing the native gates of the QPU.
-                e.g. native_gates = ['ecr', 'i', 'rz', 'sx', 'x']
-            custom_coupling_map (list, list): A list containing lists representing the connectivity of the qubits.
-                e.g. custom_coupling_map. E.g. [[0, 1], [1, 2], [2, 3]]
             optimization_level (int): Optimization level for Qiskit's transpiler. Range is from 0 to 3. Defaults to 1.
     
         Returns:
@@ -266,11 +227,7 @@ class BraketClientBackend(NumpyBackend):
                                        optimization_level = self.optimization_level,
                                        coupling_map = self.coupling_map)
         transpiled_circuit_qasm = qasm2.dumps(transpiled_circuit) # Convert back to qasm.
-        transpiled_circuit_qibo = Circuit.from_qasm(transpiled_circuit_qasm)
-        # transpiled_circuit_qasm = self.remove_qelib1_inc(transpiled_circuit_qasm)
-        # transpiled_circuit_qasm = self.qasm_convert_gates(transpiled_circuit_qasm)
-        # braket_circuit = BraketCircuit.from_ir(transpiled_circuit_qasm)
-        # return braket_circuit
+        transpiled_circuit_qibo = QiboCircuit.from_qasm(transpiled_circuit_qasm)
         return transpiled_circuit_qibo
 
     def execute_circuit(self,
@@ -289,11 +246,7 @@ class BraketClientBackend(NumpyBackend):
         measurements = circuit.measurements
         if not measurements:
             raise_error(RuntimeError, "No measurement found in the provided circuit.")
-        nqubits = circuit.nqubits
-        circuit_qasm = circuit.to_qasm()
-        circuit_qasm = self.remove_qelib1_inc(circuit_qasm)
-        circuit_qasm = self.qasm_convert_gates(circuit_qasm)
-        braket_circuit = BraketCircuit.from_ir(circuit_qasm)
+        braket_circuit = to_braket(circuit)
 
         if self.verbatim_circuit:
             braket_circuit = BraketCircuit().add_verbatim_box(braket_circuit)
