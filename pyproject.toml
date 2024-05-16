@@ -25,6 +25,7 @@ qibo = ">=0.2.4"
 qibo_client = ">=0.0.4"
 qiskit_ibm_runtime = ">=0.17"
 qiskit_ibm_provider = ">=0.8.0"
+qiskit_braket_provider = ">=0.3.1"
 amazon-braket-sdk = { version = "^1.77.3", optional = true }
 
 [tool.poetry.group.test.dependencies]
