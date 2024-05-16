@@ -1624,6 +1624,17 @@ files = [
 ]
 
 [[package]]
+name = "py"
+version = "1.11.0"
+description = "library with cross-python path, ini-parsing, io, code, log facilities"
+optional = true
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
+    {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
+]
+
+[[package]]
 name = "py4j"
 version = "0.10.9.7"
 description = "Enables Python programs to dynamically access arbitrary Java objects"
@@ -2113,6 +2124,25 @@ qasm3-import = ["qiskit-qasm3-import (>=0.1.0)"]
 visualization = ["Pillow (>=4.2.1)", "matplotlib (>=3.3)", "pydot", "pylatexenc (>=1.4)", "seaborn (>=0.9.0)"]
 
 [[package]]
+name = "qiskit-braket-provider"
+version = "0.3.1"
+description = "Qiskit-Braket provider to execute Qiskit programs on AWS quantum computing hardware devices through Amazon Braket."
+optional = true
+python-versions = ">=3.9"
+files = [
+    {file = "qiskit_braket_provider-0.3.1-py3-none-any.whl", hash = "sha256:3edb94b18dc0d0bdffb1624b74b2786cb7f86b834af68c016b44bf43b305a049"},
+    {file = "qiskit_braket_provider-0.3.1.tar.gz", hash = "sha256:9b295ab793d9200fa52a420040d0414ec72f7b23fa099ce0a402822afee713da"},
+]
+
+[package.dependencies]
+amazon-braket-sdk = ">=1.76.0"
+certifi = ">=2021.5.30"
+numpy = ">=1.3"
+qiskit = ">=0.34.2"
+qiskit-ionq = ">=0.4.7,<=0.5.0"
+setuptools = ">=40.1.0"
+
+[[package]]
 name = "qiskit-ibm-provider"
 version = "0.10.0"
 description = "Qiskit IBM Quantum Provider for accessing the quantum devices and simulators at IBM"
@@ -2158,6 +2188,23 @@ requests = ">=2.19"
 requests-ntlm = ">=1.1.0"
 urllib3 = ">=1.21.1"
 websocket-client = ">=1.5.1"
+
+[[package]]
+name = "qiskit-ionq"
+version = "0.5.0"
+description = "Qiskit provider for IonQ backends"
+optional = true
+python-versions = ">=3.7"
+files = [
+    {file = "qiskit-ionq-0.5.0.tar.gz", hash = "sha256:b9b311da8e7c6ba781510a9d2fea5cf8eb9d81aabe7d8069010e45847a6b9121"},
+    {file = "qiskit_ionq-0.5.0-py3-none-any.whl", hash = "sha256:67ce4acecd040fdee0ec5cc8a95d3003cf54fd03398274553f9b1ae13db5c1f0"},
+]
+
+[package.dependencies]
+decorator = ">=5.1.0"
+importlib-metadata = ">=4.11.4"
+requests = ">=2.24.0"
+retry = ">=0.9.0"
 
 [[package]]
 name = "recommonmark"
@@ -2226,6 +2273,21 @@ files = [
 cryptography = ">=1.3"
 pyspnego = ">=0.1.6"
 requests = ">=2.0.0"
+
+[[package]]
+name = "retry"
+version = "0.9.2"
+description = "Easy to use retry decorator."
+optional = true
+python-versions = "*"
+files = [
+    {file = "retry-0.9.2-py2.py3-none-any.whl", hash = "sha256:ccddf89761fa2c726ab29391837d4327f819ea14d244c232a1d24c67a2f98606"},
+    {file = "retry-0.9.2.tar.gz", hash = "sha256:f8bfa8b99b69c4506d6f5bd3b0aabf77f98cdb17f3c9fc3f5ca820033336fba4"},
+]
+
+[package.dependencies]
+decorator = ">=3.4.2"
+py = ">=1.4.26,<2.0.0"
 
 [[package]]
 name = "rpds-py"
@@ -3106,4 +3168,4 @@ aws = ["amazon-braket-sdk"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "8cf1dfb8b2d3d27459238ef4cc20cf81194aef69d1677bcb7a0b927a41e9a57e"
+content-hash = "a0ca7c90ba6fafba90243b700e3e0cceb9d9e3c349883d56855ca3208604bd1c"
