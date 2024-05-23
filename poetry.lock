@@ -1798,19 +1798,15 @@ name = "qibo-client"
 version = "0.0.5"
 description = "Qibo client interface."
 optional = false
-python-versions = ">=3.9,<3.13"
-files = []
-develop = false
+python-versions = "<3.13,>=3.9"
+files = [
+    {file = "qibo_client-0.0.5-py3-none-any.whl", hash = "sha256:7ae44bd488fb76cff805c6c7aa2f1a6f3ccc35e785269d5a39388406c2b32a41"},
+    {file = "qibo_client-0.0.5.tar.gz", hash = "sha256:b6228f0494c1e667cb9bb2e3c60fe039b9f9a92566ab64f35baf608ba8fa43a2"},
+]
 
 [package.dependencies]
 qibo = ">=0.2.4"
-requests = "^2.31.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/qiboteam/qibo-client.git"
-reference = "HEAD"
-resolved_reference = "e554974d7e4abbf0a7461bbc9312c34a70e7d07e"
+requests = ">=2.31.0,<3.0.0"
 
 [[package]]
 name = "qiskit"
@@ -2809,4 +2805,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "6eed89f8a21b0bd6b4cfdc22ba28548fc45df11f22bd9417a0b325101b2fa6ea"
+content-hash = "5335f1ea59cbed71344931115633d45f8e38de295295da667b5c6da312c8bd31"
