@@ -28,7 +28,7 @@ from braket.circuits import Gate, observables
 from braket.circuits import Circuit as BraketCircuit
 from braket.devices import Devices, LocalSimulator
 
-from qibo_cloud_backends.translate import to_braket
+from qibo_cloud_backends.braket_translation import to_braket
 
 _QASM_BRAKET_GATES = {
     "id": "i",
