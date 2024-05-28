@@ -123,116 +123,6 @@ class BraketClientBackend(NumpyBackend):
             graph.add_edge(q1, q2)
         return graph
 
-    def transpile_qibo_to_qibo_with_qibo(self, circuit):
-        """Transpiles a Qibo circuit with a specific topology specified by connectivity and custom_native_gates.
-            There is no option for optimization_level like Qiskit. Therefore, no gates will be collapsed.
-            Returns a Qibo circuit.
-    
-        Args:
-            circuit (qibo.models.Circuit): Circuit to transpile
-        Returns:
-            transpiled_circuit (qibo.models.Circuit): Transpiled circuit.
-            final_layout (dict): dict of connectivity?
-        """
-        
-        # Define custom passes as a list
-        custom_passes = []
-        
-        # Preprocessing adds qubits in the original circuit to match the number of qubits in the chip
-        custom_passes.append(Preprocessing(connectivity=self.custom_connectivity(self.coupling_map)))
-    
-        # Placement step
-        custom_passes.append(Random(connectivity=self.custom_connectivity(self.coupling_map))) 
-    
-        # Routing step
-        custom_passes.append(ShortestPaths(connectivity=self.custom_connectivity(self.coupling_map)))
-    
-        # custom_native_gates = [gates.I, gates.RZ, gates.SX, gates.X, gates.ECR]
-        custom_native_gates = [gates.I, gates.Z, gates.U3, gates.CZ]
-        custom_passes.append(Unroller(native_gates=NativeGates.from_gatelist(self.native_gates))) # Gate decomposition ste
-    
-        custom_pipeline = Passes(custom_passes, 
-                                 connectivity=self.custom_connectivity(self.coupling_map),
-                                 native_gates=NativeGates.from_gatelist(self.native_gates)) 
-                                # native_gates=NativeGates.default()
-    
-        transpiled_circuit, final_layout = custom_pipeline(circuit)
-    
-        return transpiled_circuit, final_layout
-
-    def transpile_qasm_circuit_with_qiskit(self, circuit_qasm, native_gates, custom_coupling_map, optimization_level=1):
-        """Transpiles a circuit given in OpenQASM format using Qiskit's transpiler.
-            Returns a transpiled circuit given in OpenQASM format.
-
-        Args:
-            circuit_qasm (OpenQASM circuit, str): circuit given in the OpenQASM format.
-            native_gates (list, str): A list of strings representing the native gates of the QPU.
-                e.g. native_gates = ['ecr', 'i', 'rz', 'sx', 'x']
-            custom_coupling_map (list, list): A list containing lists representing the connectivity of the qubits.
-                e.g. custom_coupling_map. E.g. [[0, 1], [1, 2], [2, 3]]
-            optimization_level (int): Optimization level for Qiskit's transpiler. Range is from 0 to 3. Defaults to 1.
-
-        Returns:
-            transpiled_circuit_qasm (OpenQASM circuit, str): Transpiled circuit in the OpenQASM format.
-        """
-
-        self.native_gates = native_gates
-        self.custom_coupling_map = custom_coupling_map
-
-        if optimization_level < 0 or optimization_level > 3:
-            raise_error(ValueError, "Optimization_level is between 0 to 3.")
-        if custom_coupling_map is None:
-            raise_error(ValueError, "Expected custom_coupling_map. E.g. custom_coupling_map = [[0, 1], [1, 2], [2, 3]]")
-        if native_gates is None:
-            raise_error(ValueError, "Expected native gates for transpilation. E.g. native_gates = ['ecr', 'i', 'rz', 'sx', 'x']")
-
-        # Convert to Qiskit circuit for transpilation
-        circuit_qiskit = QuantumCircuit.from_qasm_str(circuit_qasm)
-        transpiled_circuit = transpile(circuit_qiskit,
-                                       basis_gates = self.native_gates,
-                                       optimization_level = self.optimization_level,
-                                       coupling_map = self.custom_coupling_map)
-        transpiled_circuit_qasm = qasm2.dumps(transpiled_circuit) # Convert back to qasm.
-        return transpiled_circuit_qasm
-
-    def transpile_qibo_to_braket_with_qiskit(self, circuit_qibo, optimization_level=1):
-        """Transpiles a Qibo circuit using Qiskit's transpiler. Returns a Braket circuit.
-    
-        Args:
-            circuit_qibo (qibo.models.Circuit): Qibo circuit to transpile.
-            native_gates (list, str): A list of strings representing the native gates of the QPU.
-                e.g. native_gates = ['ecr', 'i', 'rz', 'sx', 'x']
-            custom_coupling_map (list, list): A list containing lists representing the connectivity of the qubits.
-                e.g. custom_coupling_map. E.g. [[0, 1], [1, 2], [2, 3]]
-            optimization_level (int): Optimization level for Qiskit's transpiler. Range is from 0 to 3. Defaults to 1.
-    
-        Returns:
-            transpiled_circuit_braket (braket.circuits.Circuit): Braket circuit to that has been transpiled.
-        """
-
-        print('Transpile qibo to braket using qiskit')
-        
-        if optimization_level < 0 or optimization_level > 3:
-            raise_error(ValueError, "Optimization_level is between 0 to 3.")
-        else:
-            self.optimization_level = optimization_level
-        if custom_coupling_map is None:
-            raise_error(ValueError, "Expected custom_coupling_map. E.g. custom_coupling_map = [[0, 1], [1, 2], [2, 3]]")
-        if native_gates is None:
-            raise_error(ValueError, "Expected native gates for transpilation. E.g. native_gates = ['ecr', 'i', 'rz', 'sx', 'x']")
-
-        circuit_qasm = circuit_qibo.to_qasm()
-        circuit_qiskit = QuantumCircuit.from_qasm_str(circuit_qasm)
-        transpiled_circuit = transpile(circuit_qiskit,
-                                       basis_gates = self.native_gates,
-                                       optimization_level = self.optimization_level,
-                                       coupling_map = self.coupling_map)
-        transpiled_circuit_qasm = qasm2.dumps(transpiled_circuit) # Convert back to qasm.
-        transpiled_circuit_qasm = self.remove_qelib1_inc(transpiled_circuit_qasm)
-        transpiled_circuit_qasm = self.qasm_convert_gates(transpiled_circuit_qasm)
-        braket_circuit = BraketCircuit.from_ir(transpiled_circuit_qasm)
-        return braket_circuit
-
     def transpile_qibo_to_qibo_with_qiskit(self, circuit_qibo, optimization_level=1):
         """Transpiles a Qibo circuit using Qiskit's transpiler. Returns a Qibo circuit.
     
@@ -274,7 +164,7 @@ class BraketClientBackend(NumpyBackend):
         return transpiled_circuit_qibo
 
     def execute_circuit(self,
-                        circuit,
+                        circuit_qibo,
                         nshots=1000,
                         **kwargs):
         """Executes a Qibo circuit on an AWS Braket device. The device defaults to the LocalSimulator().
@@ -286,20 +176,38 @@ class BraketClientBackend(NumpyBackend):
             Measurement outcomes (qibo.measurement.MeasurementOutcomes): The outcome of the circuit execution.
         """
         
-        measurements = circuit.measurements
+        measurements = circuit_qibo.measurements
         if not measurements:
             raise_error(RuntimeError, "No measurement found in the provided circuit.")
-        nqubits = circuit.nqubits
-        circuit_qasm = circuit.to_qasm()
-        circuit_qasm = self.remove_qelib1_inc(circuit_qasm)
-        circuit_qasm = self.qasm_convert_gates(circuit_qasm)
+        nqubits = circuit_qibo.nqubits
+
+        # Extract qibo circuit without the measurements
+        circuit_qibo_no_meas = circuit_qibo.__class__(**circuit_qibo.init_kwargs)
+        meas_on_qubits = []
+        for gate in circuit_qibo.queue:
+            if gate.name != "measure":
+                circuit_qibo_no_meas.add(gate)
+            else:
+                meas_on_qubits.append(gate.qubits[0])
+
+        # Translate qibo circuit without measurements to qasm then to braket
+        circuit_qasm = circuit_qibo_no_meas.to_qasm()
+        circuit_qasm = AWS.remove_qelib1_inc(circuit_qasm)
+        circuit_qasm = AWS.qasm_convert_gates(circuit_qasm)
         braket_circuit = BraketCircuit.from_ir(circuit_qasm)
-
+        
         if self.verbatim_circuit:
+            print('Added verbatim box')
             braket_circuit = BraketCircuit().add_verbatim_box(braket_circuit)
-        result = self.device.run(braket_circuit, shots=nshots).result()
-        samples = result.measurements
+        
+        # Add the measurements after the if-verbatim-circuit check, else the
+        # measurements are within the verbatim box and an error will be raised.
+        braket_circuit.measure(meas_on_qubits)
 
+        # Execute circuit on self.device
+        task = self.device.run(braket_circuit, shots=nshots)
+        samples = task.result().measurements
+        
         return MeasurementOutcomes(
             measurements=measurements, backend=self, samples=samples, nshots=nshots
         )
