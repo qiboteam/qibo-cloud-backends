@@ -196,3 +196,5 @@ def _(g: qibo_gates.U3):
 @_translate_op.register
 def _(g: qibo_gates.Unitary):
     return braket_gates.Unitary(g.matrix())
+
+    
