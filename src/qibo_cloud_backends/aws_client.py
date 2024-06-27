@@ -49,12 +49,8 @@ class BraketClientBackend(NumpyBackend):
             device (str): The ARN of the Braket device. Defaults to Braket's statevector LocalSimulator, LocalSimulator("default").
                           Other devices are Braket's density matrix simulator, LocalSimulator("braket_dm"), or any other
                           QPUs.
-            verbatim_circuit (bool): If `True`, wrap the Braket circuit in a verbatim box to run it on the QPU
+            verbatim_circuit (bool): If `True`, to_braket will wrap the Braket circuit in a verbatim box to run it on the QPU
                                      without any transpilation. Defaults to `False`.
-            transpilation (bool): If `True`, check for two additional arguments: native_gates and coupling_map.
-            native_gates: - For qibo transpiler:   (list, qibo.gates): e.g. [gates.I, gates.RZ, gates.SX, gates.X, gates.ECR]
-                          - For qiskit transpiler: (list, str):        e.g. ['ecr', 'i', 'rz', 'sx', 'x']
-            coupling_map (list, list): E.g. [[0, 1], [0, 7], [1, 2], [2, 3], [4, 3], [4, 5], [6, 5], [7, 6]]
         """
         super().__init__()
         
@@ -96,8 +92,7 @@ class BraketClientBackend(NumpyBackend):
     
         Args:
             circuit_qibo (qibo.models.Circuit): Qibo circuit to transpile.
-            native_gates: - For qibo transpiler:   (list, qibo.gates): e.g. [gates.I, gates.RZ, gates.SX, gates.X, gates.ECR]
-                          - For qiskit transpiler: (list, str):        e.g. ['ecr', 'i', 'rz', 'sx', 'x']
+            native_gates (list, str): e.g. ['ecr', 'i', 'rz', 'sx', 'x']. IQM uses ['cz', 'prx'].
             coupling_map (list, list): E.g. [[0, 1], [0, 7], [1, 2], [2, 3], [4, 3], [4, 5], [6, 5], [7, 6]]
             optimization_level (int): Optimization level for Qiskit's transpiler. Range is from 0 to 3. Defaults to 1.
     
