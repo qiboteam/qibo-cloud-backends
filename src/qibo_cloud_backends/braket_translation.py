@@ -9,7 +9,7 @@ from braket.circuits import (
 from qibo import Circuit as QiboCircuit, gates as qibo_gates
 
 
-def to_braket(qibo_circuit: QiboCircuit) -> BraketCircuit:
+def to_braket(qibo_circuit: QiboCircuit, verbatin_circuit: bool) -> BraketCircuit:
     circuit = BraketCircuit()
 
     # Add gates
@@ -18,6 +18,10 @@ def to_braket(qibo_circuit: QiboCircuit) -> BraketCircuit:
             continue
 
         circuit.add_instruction(Instruction(_translate_op(gate), gate.qubits))
+
+    # Add verbatim box
+    if verbatim_circuit:
+        circuit = BraketCircuit().add_verbatim_box(circuit)
 
     # Add measurements
     for register, qubits in qibo_circuit.measurement_tuples.items():
@@ -84,6 +88,12 @@ def _(_: qibo_gates.SX):
 @_translate_op.register
 def _(_: qibo_gates.SXDG):
     return braket_gates.Vi()
+
+
+@_translate_op.register
+def _(g: qibo_gates.PRX):
+    parameters = g.parameters
+    return braket_gates.PRx(parameters[0], parameters[1])
 
 
 @_translate_op.register
