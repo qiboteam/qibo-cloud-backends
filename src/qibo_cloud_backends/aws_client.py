@@ -87,7 +87,7 @@ class BraketClientBackend(NumpyBackend):
             graph.add_edge(q1, q2)
         return graph
 
-    def transpile_qibo_to_qibo_with_qiskit(self, native_gates, circuit_qibo, optimization_level=1):
+    def transpile_qibo_to_qibo_with_qiskit(self, circuit_qibo, native_gates=None, coupling_map=None, optimization_level=1):
         """Transpiles a Qibo circuit using Qiskit's transpiler. Returns a Qibo circuit.
     
         Args:
