@@ -68,7 +68,7 @@ class BraketClientBackend(NumpyBackend):
         #     else:
         #         self.native_gates = native_gates
 
-        self.device = AwsDevice(device) if device else LocalSimulator()
+        self.device = device if device else LocalSimulator()
         self.name = "aws"
 
     @staticmethod
