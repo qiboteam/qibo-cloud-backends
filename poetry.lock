@@ -1795,18 +1795,22 @@ torch = ["torch (>=2.1.1,<3.0.0)"]
 
 [[package]]
 name = "qibo-client"
-version = "0.0.5"
+version = "0.0.6"
 description = "Qibo client interface."
 optional = false
-python-versions = "<3.13,>=3.9"
-files = [
-    {file = "qibo_client-0.0.5-py3-none-any.whl", hash = "sha256:7ae44bd488fb76cff805c6c7aa2f1a6f3ccc35e785269d5a39388406c2b32a41"},
-    {file = "qibo_client-0.0.5.tar.gz", hash = "sha256:b6228f0494c1e667cb9bb2e3c60fe039b9f9a92566ab64f35baf608ba8fa43a2"},
-]
+python-versions = ">=3.9,<3.13"
+files = []
+develop = false
 
 [package.dependencies]
-qibo = ">=0.2.4"
-requests = ">=2.31.0,<3.0.0"
+qibo = "^0.2.4"
+requests = "^2.31.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/qiboteam/qibo-client.git"
+reference = "timeout"
+resolved_reference = "f7129a1ee8aaff6f5ba9f1cd57328ff88d85f83a"
 
 [[package]]
 name = "qiskit"
@@ -2756,4 +2760,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "5335f1ea59cbed71344931115633d45f8e38de295295da667b5c6da312c8bd31"
+content-hash = "696ceebe664dae1573604003715ecd1a5af4b18f61af55e00a2627d3b5874515"
