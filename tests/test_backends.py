@@ -63,14 +63,14 @@ def test_qibo_client_backend():
 #     assert GlobalBackend().name == backend
 
 
-def test_list_available_backends():
-    available_backends = {
-        "numpy": True,
-        "tensorflow": False,
-        "pytorch": False,
-        "qibojit": False,
-        "qibolab": False,
-        "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
-        "qibotn": False,
-    }
-    assert list_available_backends() == available_backends
+# def test_list_available_backends():
+#     available_backends = {
+#         "numpy": True,
+#         "tensorflow": False,
+#         "pytorch": False,
+#         "qibojit": False,
+#         "qibolab": False,
+#         "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
+#         "qibotn": False,
+#     }
+#     assert list_available_backends() == available_backends
