@@ -41,21 +41,21 @@ QIBO_TK = os.environ.get("QIBO_CLIENT_TII_TOKEN")
 #         local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(), atol=1e-1
 #     )
 
-@pytest.mark.skipif(
-    not (sys.platform == "linux" and sys.version_info[:2] == (3, 11)),
-    reason="Multiple parallel jobs on IBMQ are not supported.",
-)
-def test_qibo_client_backend():
-    c = random_clifford(3, backend=NP_BACKEND)
-    c.add(gates.M(0, 2))
-    client = QiboClientBackend(token=QIBO_TK, provider="TII")
-    local_res = NP_BACKEND.execute_circuit(c)
-    remote_res = client.execute_circuit(c)
-    NP_BACKEND.assert_allclose(
-        local_res.probabilities(qubits=[0, 2]),
-        remote_res.probabilities(qubits=[0, 2]),
-        atol=1e-1,
-    )
+# @pytest.mark.skipif(
+#     not (sys.platform == "linux" and sys.version_info[:2] == (3, 11)),
+#     reason="Multiple parallel jobs on IBMQ are not supported.",
+# )
+# def test_qibo_client_backend():
+#     c = random_clifford(3, backend=NP_BACKEND)
+#     c.add(gates.M(0, 2))
+#     client = QiboClientBackend(token=QIBO_TK, provider="TII")
+#     local_res = NP_BACKEND.execute_circuit(c)
+#     remote_res = client.execute_circuit(c)
+#     NP_BACKEND.assert_allclose(
+#         local_res.probabilities(qubits=[0, 2]),
+#         remote_res.probabilities(qubits=[0, 2]),
+#         atol=1e-1,
+#     )
 
 
 # @pytest.mark.parametrize(
@@ -67,14 +67,14 @@ def test_qibo_client_backend():
 #     assert GlobalBackend().name == backend
 
 
-# def test_list_available_backends():
-#     available_backends = {
-#         "numpy": True,
-#         "tensorflow": False,
-#         "pytorch": False,
-#         "qibojit": False,
-#         "qibolab": False,
-#         "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
-#         "qibotn": False,
-#     }
-#     assert list_available_backends() == available_backends
+def test_list_available_backends():
+    available_backends = {
+        "numpy": True,
+        "tensorflow": False,
+        "pytorch": False,
+        "qibojit": False,
+        "qibolab": False,
+        "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
+        "qibotn": False,
+    }
+    assert list_available_backends() == available_backends
