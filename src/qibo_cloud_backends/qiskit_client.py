@@ -13,7 +13,7 @@ class QiskitClientBackend(NumpyBackend):
     Args:
         token (str): User authentication token.
         provider (str): Name of the IBM service provider. Defaults to `"ibm-q"`.
-        platform (str): The IBM platform. Defaults to `"ibmq_qasm_simulator"`.
+        platform (str): The IBM platform. Defaults to `"ibm_osaka"`.
     """
 
     def __init__(self, token, provider=None, platform=None):
@@ -21,7 +21,7 @@ class QiskitClientBackend(NumpyBackend):
         if provider is None:
             provider = "ibm-q"
         if platform is None:
-            platform = "ibmq_qasm_simulator"
+            platform = "ibm_osaka"
         self.platform = platform
         self.name = "qiskit-client"
         self.device = provider

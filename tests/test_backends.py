@@ -1,7 +1,8 @@
 import os
 
+import numpy as np
 import pytest
-from qibo import gates
+from qibo import Circuit, gates
 from qibo.backends import (
     GlobalBackend,
     NumpyBackend,
@@ -18,10 +19,16 @@ QIBO_TK = os.environ.get("QIBO_CLIENT_TII_TOKEN")
 
 
 def test_qiskit_client_backend():
-    c = random_clifford(3, backend=NP_BACKEND)
+    # ibm_osaka's native gates are: ECR, I, RZ, SX, X
+    c = Circuit(3)
+    c.add(gates.X(0))
+    # c.add(gates.ECR(0,1)) # ECR not supported by (our) QASM apparently
+    # c.add(gates.ECR(1,2))
+    c.add(gates.SX(1))
+    c.add(gates.RZ(2, theta=np.pi / 2))
     c.add(gates.M(0, 2))
     client = QiskitClientBackend(
-        token=QISKIT_TK, provider="ibm-q", platform="ibmq_qasm_simulator"
+        token=QISKIT_TK, provider="ibm-q", platform="ibm_osaka"
     )
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
