@@ -44,15 +44,21 @@ class MetaBackend:
             )
 
     def list_available(self, tokens: dict = None) -> dict:
-        """Lists all the available qibocloud backends."""
+        """Lists all the available qibocloud backends.
+
+        Args:
+            tokens (dict): Mapping between the workers and their tokens, e.g.
+                           {"qibo-client": "xxxxx", "qiskit-client": "xxxxx"}.
+                           By default reads the variables ("QIBO_CLIENT_TII_TOKEN", "IBMQ_TOKEN").
+        Returns:
+            dict: the qibo-cloud available backends.
+        """
         if tokens is None:
             tokens = {}
         available_backends = {}
         for worker, token in zip(WORKERS, TOKENS):
             try:
-                token = tokens.get(
-                    worker, os.environ[f"{worker.replace('-', '_').upper()}_TOKEN"]
-                )
+                token = tokens.get(worker, os.environ[token])
                 MetaBackend.load(worker=worker, token=token)
                 available = True
             except:
