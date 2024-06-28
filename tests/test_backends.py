@@ -1,4 +1,5 @@
 import os
+import sys
 
 import numpy as np
 import pytest
@@ -18,6 +19,10 @@ QISKIT_TK = os.environ.get("IBMQ_TOKEN")
 QIBO_TK = os.environ.get("QIBO_CLIENT_TII_TOKEN")
 
 
+@pytest.mark.skipif(
+    sys.version_info[:2] != (3, 11) and sys.platform != "linux",
+    reason="Multiple parallel jobs on IBMQ are not supported.",
+)
 def test_qiskit_client_backend():
     # ibm_osaka's native gates are: ECR, I, RZ, SX, X
     c = Circuit(3)
