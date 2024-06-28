@@ -58,13 +58,13 @@ QIBO_TK = os.environ.get("QIBO_CLIENT_TII_TOKEN")
 #     )
 
 
-# @pytest.mark.parametrize(
-#     "backend,token", [("qibo-client", QIBO_TK), ("qiskit-client", QISKIT_TK)]
-# )
-# def test_set_backend(backend, token):
-#     set_backend("qibo-cloud-backends", worker=backend, token=token)
-#     assert isinstance(GlobalBackend(), MetaBackend.load(backend, token=token).__class__)
-#     assert GlobalBackend().name == backend
+@pytest.mark.parametrize(
+    "backend,token", [("qibo-client", QIBO_TK), ("qiskit-client", QISKIT_TK)]
+)
+def test_set_backend(backend, token):
+    set_backend("qibo-cloud-backends", worker=backend, token=token)
+    assert isinstance(GlobalBackend(), MetaBackend.load(backend, token=token).__class__)
+    assert GlobalBackend().name == backend
 
 
 def test_list_available_backends():
