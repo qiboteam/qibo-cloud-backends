@@ -44,7 +44,7 @@ class MetaBackend:
             )
 
     def list_available(self, tokens: dict = None) -> dict:
-        """Lists all the available qibocloud backends.
+        """Lists all the available qibo cloud backends.
 
         Args:
             tokens (dict): Mapping between the workers and their tokens, e.g.
