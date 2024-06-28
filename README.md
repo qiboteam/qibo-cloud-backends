@@ -43,7 +43,7 @@ Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
 
    from qibo.backends import set_backend
 
-   set_backend("qibo-cloud", token="your_token", provider="TII", platform="sim")
+   set_backend("qibo-client", token="your_token", provider="TII", platform="sim")
    result = circuit()
    print(result.frequencies())
 ```

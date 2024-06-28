@@ -31,10 +31,6 @@ class QiboClientBackend(NumpyBackend):
                 f"Unsupported provider {provider}, please pick one in {PROVIDERS_LIST}.",
             )
         self.client = getattr(qibo_client, provider)(token)
-        # test connection
-        from qibo import Circuit
-
-        self.client.run_circuit(Circuit(1), device=self.platform)
 
     def execute_circuit(self, circuit, nshots=1000):
         """Executes the passed circuit.
