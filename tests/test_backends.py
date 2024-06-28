@@ -41,6 +41,10 @@ def test_qiskit_client_backend():
         local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(), atol=1e-1
     )
 
+@pytest.mark.skipif(
+    not (sys.platform == "linux" and sys.version_info[:2] == (3, 11)),
+    reason="Multiple parallel jobs on IBMQ are not supported.",
+)
 def test_qibo_client_backend():
     c = random_clifford(3, backend=NP_BACKEND)
     c.add(gates.M(0, 2))
