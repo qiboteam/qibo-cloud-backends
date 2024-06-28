@@ -20,7 +20,7 @@ QIBO_TK = os.environ.get("QIBO_CLIENT_TII_TOKEN")
 
 
 @pytest.mark.skipif(
-    sys.version_info[:2] != (3, 11) and sys.platform != "linux",
+    not (sys.platform == "linux" and sys.version_info[:2] == (3, 11)),
     reason="Multiple parallel jobs on IBMQ are not supported.",
 )
 def test_qiskit_client_backend():
