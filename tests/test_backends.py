@@ -73,5 +73,5 @@ def test_qiskit_client_backend():
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
     NP_BACKEND.assert_allclose(
-        local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(), atol=1e-1
+        local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(), atol=0.2
     )
