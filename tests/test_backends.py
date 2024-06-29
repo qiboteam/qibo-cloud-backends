@@ -19,10 +19,11 @@ QISKIT_TK = os.environ.get("IBMQ_TOKEN")
 QIBO_TK = os.environ.get("QIBO_CLIENT_TII_TOKEN")
 
 
-def test_qibo_client_backend():
+@pytest.mark.parametrize("token", [None, QIBO_TK])
+def test_qibo_client_backend(token):
     c = random_clifford(3, backend=NP_BACKEND)
     c.add(gates.M(0, 2))
-    client = QiboClientBackend(token=QIBO_TK, provider="TII")
+    client = QiboClientBackend(token=token, provider="TII")
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
     NP_BACKEND.assert_allclose(
@@ -32,13 +33,29 @@ def test_qibo_client_backend():
     )
 
 
+def test_qibo_client_backend_provider_error():
+    with pytest.raises(RuntimeError):
+        QiboClientBackend(provider="non-existing-provider")
+
+
 @pytest.mark.parametrize(
-    "backend,token", [("qibo-client", QIBO_TK), ("qiskit-client", QISKIT_TK)]
+    "backend,token",
+    [
+        ("qibo-client", QIBO_TK),
+        ("qiskit-client", QISKIT_TK),
+        ("non-existing-client", None),
+    ],
 )
 def test_set_backend(backend, token):
-    set_backend("qibo-cloud-backends", worker=backend, token=token)
-    assert isinstance(GlobalBackend(), MetaBackend.load(backend, token=token).__class__)
-    assert GlobalBackend().name == backend
+    if backend == "non-existing-client":
+        with pytest.raises(ValueError):
+            set_backend("qibo-cloud-backends", worker=backend, token=token)
+    else:
+        set_backend("qibo-cloud-backends", worker=backend, token=token)
+        assert isinstance(
+            GlobalBackend(), MetaBackend.load(backend, token=token).__class__
+        )
+        assert GlobalBackend().name == backend
 
 
 def test_list_available_backends():
@@ -58,7 +75,8 @@ def test_list_available_backends():
     not (sys.platform == "linux" and sys.version_info[:2] == (3, 11)),
     reason="Multiple parallel jobs on IBMQ are not supported.",
 )
-def test_qiskit_client_backend():
+@pytest.mark.parametrize("token", [None, QISKIT_TK])
+def test_qiskit_client_backend(token):
     # ibm_osaka's native gates are: ECR, I, RZ, SX, X
     c = Circuit(3)
     c.add(gates.X(0))
@@ -67,9 +85,7 @@ def test_qiskit_client_backend():
     c.add(gates.SX(1))
     c.add(gates.RZ(2, theta=np.pi / 2))
     c.add(gates.M(0, 2))
-    client = QiskitClientBackend(
-        token=QISKIT_TK, provider="ibm-q", platform="ibm_osaka"
-    )
+    client = QiskitClientBackend(token=token, provider="ibm-q", platform="ibm_osaka")
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
     NP_BACKEND.assert_allclose(

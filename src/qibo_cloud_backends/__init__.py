@@ -28,16 +28,14 @@ class MetaBackend:
             worker (str): Name of the backend to load, one in ("qibo-client", "qiskit-client").
             token (str): User token for the remote connection.
             provider (str): Name of the provider of the service, e.g. `ibm-q` for IBM.
-            platform (str): Name of the platform to connect to on the provider's servers, e.g. `ibmq_qasm_simulator` for IBM.
+            platform (str): Name of the platform to connect to on the provider's servers, e.g. `ibm_osaka`.
         Returns:
             qibo.backends.abstract.Backend: The loaded backend.
         """
 
         if worker == "qibo-client":
-            token = os.environ["QIBO_CLIENT_TII_TOKEN"] if token is None else token
             return QiboClientBackend(token, provider, platform)
         elif worker == "qiskit-client":
-            token = os.environ["IBMQ_TOKEN"] if token is None else token
             return QiskitClientBackend(token, provider, platform)
         else:
             raise_error(

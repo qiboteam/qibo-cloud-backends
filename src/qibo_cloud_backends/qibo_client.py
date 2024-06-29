@@ -1,3 +1,5 @@
+import os
+
 import qibo_client
 from qibo.backends import NumpyBackend
 from qibo.config import raise_error
@@ -16,8 +18,16 @@ class QiboClientBackend(NumpyBackend):
         platform (str): Name of the platform. Defaults to `"sim"`.
     """
 
-    def __init__(self, token, provider=None, platform=None):
+    def __init__(self, token=None, provider=None, platform=None):
         super().__init__()
+        if token is None:
+            try:
+                token = os.environ["QIBO_CLIENT_TII_TOKEN"]
+            except KeyError:  # pragma: no cover
+                raise_error(
+                    RuntimeError,
+                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `QIBO_CLIENT_TII_TOKEN='your_token'`.",
+                )
         if provider is None:
             provider = "TII"
         if platform is None:
