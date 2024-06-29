@@ -55,12 +55,12 @@ jobs:
           poe lint
           poe lint-warnings
       - name: Test
-        if: github.event.comment.body == '/run_tests'  # check if the comment calls the tests execution
+        if: contains(github.event.comment.body, '/run_tests')  # check if the comment calls the tests execution
         run: |
           source $VENV
           poe test
       - name: Upload coverage to Codecov
-        if: startsWith(runner.os, 'Linux') && github.event.comment.body == '/run_tests'
+        if: startsWith(runner.os, 'Linux') && contains(github.event.comment.body, '/run_tests')
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
