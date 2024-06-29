@@ -20,7 +20,7 @@ class MetaBackend:
 
     @staticmethod
     def load(
-        worker: str, token: str, provider: str = None, platform: str = None
+        worker: str, token: str = None, provider: str = None, platform: str = None
     ) -> QibocloudBackend:
         """Loads the backend.
 
@@ -34,8 +34,10 @@ class MetaBackend:
         """
 
         if worker == "qibo-client":
+            token = os.environ["QIBO_CLIENT_TII_TOKEN"] if token is None else token
             return QiboClientBackend(token, provider, platform)
         elif worker == "qiskit-client":
+            token = os.environ["IBMQ_TOKEN"] if token is None else token
             return QiskitClientBackend(token, provider, platform)
         else:
             raise_error(
