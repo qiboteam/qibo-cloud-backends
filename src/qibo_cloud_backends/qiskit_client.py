@@ -1,3 +1,4 @@
+import os
 from itertools import repeat
 
 from qibo.backends import NumpyBackend
@@ -11,7 +12,7 @@ class QiskitClientBackend(NumpyBackend):
     """Backend for the remote execution of Qiskit circuits on the IBM servers.
 
     Args:
-        token (str): User authentication token.
+        token (str): User authentication token. By default this is read from the 'IBMQ_TOKEN' environment variable.
         provider (str): Name of the IBM service provider. Defaults to `"ibm-q"`.
         platform (str): The IBM platform. Defaults to `"ibm_osaka"`.
     """

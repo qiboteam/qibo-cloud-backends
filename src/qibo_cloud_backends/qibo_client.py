@@ -13,7 +13,7 @@ class QiboClientBackend(NumpyBackend):
     """Backend for the remote execution of Qibo circuits.
 
     Args:
-        token (str): User authentication token.
+        token (str): User authentication token. By default this is read from the 'QIBO_CLIENT_TII_TOKEN' environment variable.
         provider (str): Name of the service provider. Defaults to `"TII"`.
         platform (str): Name of the platform. Defaults to `"sim"`.
     """
