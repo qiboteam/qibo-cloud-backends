@@ -5,8 +5,6 @@ on:
   merge_group:
   pull_request:
     types: [labeled]
-  issue_comment:
-    types: [created, edited, deleted]
 
 env:
   IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
@@ -14,7 +12,7 @@ env:
 
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push' || contains(github.event.comment.body, '/run_tests')
+    if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -55,12 +53,11 @@ jobs:
           poe lint
           poe lint-warnings
       - name: Test
-        if: contains(github.event.comment.body, '/run_tests')  # check if the comment calls the tests execution
         run: |
           source $VENV
           poe test
       - name: Upload coverage to Codecov
-        if: startsWith(runner.os, 'Linux') && contains(github.event.comment.body, '/run_tests')
+        if: startsWith(runner.os, 'Linux')
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml

@@ -61,7 +61,7 @@ class MetaBackend:
                 token = tokens.get(worker, os.environ[token])
                 MetaBackend.load(worker=worker, token=token)
                 available = True
-            except:
+            except:  # pragma: no cover
                 available = False
             available_backends[worker] = available
         return available_backends
