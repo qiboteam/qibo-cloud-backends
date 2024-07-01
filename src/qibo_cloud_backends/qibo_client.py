@@ -13,7 +13,7 @@ class QiboClientBackend(NumpyBackend):
     """Backend for the remote execution of Qibo circuits.
 
     Args:
-        token (str): User authentication token. By default this is read from the 'QIBO_CLIENT_TII_TOKEN' environment variable.
+        token (str): User authentication token. By default this is read from the 'QIBO_CLIENT_TOKEN' environment variable.
         provider (str): Name of the service provider. Defaults to `"TII"`.
         platform (str): Name of the platform. Defaults to `"sim"`.
     """
@@ -22,11 +22,11 @@ class QiboClientBackend(NumpyBackend):
         super().__init__()
         if token is None:
             try:
-                token = os.environ["QIBO_CLIENT_TII_TOKEN"]
+                token = os.environ["QIBO_CLIENT_TOKEN"]
             except KeyError:  # pragma: no cover
                 raise_error(
                     RuntimeError,
-                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `QIBO_CLIENT_TII_TOKEN='your_token'`.",
+                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `QIBO_CLIENT_TOKEN='your_token'`.",
                 )
         if provider is None:
             provider = "TII"

@@ -24,7 +24,7 @@ The qibo-client-backends package can be installed through pip:
 
 Once installed, the plugin allows for setting and using the new backends in Qibo.
 
-The following two examples show how to submit a job on the TII cluster and the IBM servers. Remember to replace `"your token"` string with your actual valid token received after registration. Alternatively, you can register your token under the environment variables `QIBO_CLIENT_TII_TOKEN` for `qibo-client` and `IBMQ_TOKEN` for `qiskit-client`.
+The following two examples show how to submit a job on the TII cluster and the IBM servers. Remember to replace `"your token"` string with your actual valid token received after registration. Alternatively, you can register your token under the environment variables `QIBO_CLIENT_TOKEN` for `qibo-client` and `IBMQ_TOKEN` for `qiskit-client`.
 
 Prepare a QFT circuit to be submitted to the servers:
 

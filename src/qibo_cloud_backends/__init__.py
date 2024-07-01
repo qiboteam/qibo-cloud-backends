@@ -12,7 +12,7 @@ __version__ = im.version(__package__)
 QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend]
 
 WORKERS = ("qibo-client", "qiskit-client")
-TOKENS = ("QIBO_CLIENT_TII_TOKEN", "IBMQ_TOKEN")
+TOKENS = ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN")
 
 
 class MetaBackend:
@@ -49,7 +49,7 @@ class MetaBackend:
         Args:
             tokens (dict): Mapping between the workers and their tokens, e.g.
                            {"qibo-client": "xxxxx", "qiskit-client": "xxxxx"}.
-                           By default reads the variables ("QIBO_CLIENT_TII_TOKEN", "IBMQ_TOKEN").
+                           By default reads the variables ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN").
         Returns:
             dict: the qibo-cloud available backends.
         """
