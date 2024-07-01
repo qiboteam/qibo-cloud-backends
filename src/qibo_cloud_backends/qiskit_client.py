@@ -1,3 +1,4 @@
+import os
 from itertools import repeat
 
 from qibo.backends import NumpyBackend
@@ -11,19 +12,27 @@ class QiskitClientBackend(NumpyBackend):
     """Backend for the remote execution of Qiskit circuits on the IBM servers.
 
     Args:
-        token (str): User authentication token.
+        token (str): User authentication token. By default this is read from the 'IBMQ_TOKEN' environment variable.
         provider (str): Name of the IBM service provider. Defaults to `"ibm-q"`.
-        platform (str): The IBM platform. Defaults to `"ibmq_qasm_simulator"`.
+        platform (str): The IBM platform. Defaults to `"ibm_osaka"`.
     """
 
-    def __init__(self, token, provider=None, platform=None):
+    def __init__(self, token=None, provider=None, platform=None):
         super().__init__()
+        if token is None:
+            try:
+                token = os.environ["IBMQ_TOKEN"]
+            except KeyError:  # pragma: no cover
+                raise_error(
+                    RuntimeError,
+                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `IBMQ_TOKEN='your_token'`.",
+                )
         if provider is None:
             provider = "ibm-q"
         if platform is None:
-            platform = "ibmq_qasm_simulator"
+            platform = "ibm_osaka"
         self.platform = platform
-        self.name = "qiskit"
+        self.name = "qiskit-client"
         self.device = provider
         provider = IBMProvider(token)
         self.backend = provider.get_backend(platform)

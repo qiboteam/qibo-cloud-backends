@@ -20,9 +20,9 @@ classifiers = [
 packages = [{ include = "qibo_cloud_backends", from = "src" }]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
-qibo = ">=0.2.4"
-qibo_client = ">=0.0.4"
+python = ">=3.9,<3.13"
+qibo = "^0.2.8"
+qibo_client = "^0.0.6"
 qiskit_ibm_runtime = ">=0.17"
 qiskit_ibm_provider = ">=0.8.0"
 
