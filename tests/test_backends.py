@@ -16,7 +16,7 @@ from qibo_cloud_backends import MetaBackend, QiboClientBackend, QiskitClientBack
 
 NP_BACKEND = NumpyBackend()
 QISKIT_TK = os.environ.get("IBMQ_TOKEN")
-QIBO_TK = os.environ.get("QIBO_CLIENT_TII_TOKEN")
+QIBO_TK = os.environ.get("QIBO_CLIENT_TOKEN")
 
 
 @pytest.mark.parametrize("token", [None, QIBO_TK])
