@@ -49,7 +49,7 @@ Then, to simulate the circuit using the Qibo cloud service through the `sim` pla
 
    from qibo.backends import set_backend
 
-   set_backend("qibo-cloud-backends", service="qibo-client", token="your_token", platform="sim")
+   set_backend("qibo-cloud-backends", client="qibo-client", token="your_token", platform="sim")
    result = circuit()
    print(result.frequencies())
 
@@ -57,7 +57,7 @@ or, in order to use the `ibm_osaka` platform on the IBM `ibm-q` server:
 
 .. code-block:: python
 
-   set_backend("qibo-cloud-backends", service="qiskit-client", token="your_token", platform="ibm_osaka")
+   set_backend("qibo-cloud-backends", client="qiskit-client", token="your_token", platform="ibm_osaka")
    result = circuit()
    print(result.frequencies())
 

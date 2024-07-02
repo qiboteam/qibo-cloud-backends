@@ -71,9 +71,9 @@ def test_qibo_client_backend_initial_state():
 def test_set_backend(backend, token):
     if backend == "non-existing-client":
         with pytest.raises(ValueError):
-            set_backend("qibo-cloud-backends", service=backend, token=token)
+            set_backend("qibo-cloud-backends", client=backend, token=token)
     else:
-        set_backend("qibo-cloud-backends", service=backend, token=token)
+        set_backend("qibo-cloud-backends", client=backend, token=token)
         assert isinstance(
             GlobalBackend(), MetaBackend.load(backend, token=token).__class__
         )

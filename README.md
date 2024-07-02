@@ -38,7 +38,7 @@ Prepare a QFT circuit to be submitted to the servers:
 Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
 
 ```python
-   qibo.set_backend("qibo-cloud-backends", service="qibo-client", token="your_token", platform="sim")
+   qibo.set_backend("qibo-cloud-backends", client="qibo-client", token="your_token", platform="sim")
    result = circuit()
    print(result.frequencies())
 ```
@@ -46,7 +46,7 @@ Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
 or, in order to run on one of the chips hosted in `ibm-q`, e.g. `ibm_osaka`:
 
 ```python
-   qibo.set_backend("qibo-cloud-backends", service="qiskit-client", token="your_token", platform="ibm_osaka")
+   qibo.set_backend("qibo-cloud-backends", client="qiskit-client", token="your_token", platform="ibm_osaka")
    result = circuit()
    print(result.frequencies())
 ```
