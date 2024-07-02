@@ -11,7 +11,7 @@ __version__ = im.version(__package__)
 
 QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend]
 
-WORKERS = ("qibo-client", "qiskit-client")
+SERVICES = ("qibo-client", "qiskit-client")
 TOKENS = ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN")
 
 
@@ -20,34 +20,33 @@ class MetaBackend:
 
     @staticmethod
     def load(
-        worker: str, token: str = None, provider: str = None, platform: str = None
+        service: str, token: str = None, platform: str = None
     ) -> QibocloudBackend:
         """Loads the backend.
 
         Args:
-            worker (str): Name of the backend to load, one in ("qibo-client", "qiskit-client").
+            service (str): Name of the cloud service to load, one in ("qibo-client", "qiskit-client").
             token (str): User token for the remote connection.
-            provider (str): Name of the provider of the service, e.g. `ibm-q` for IBM.
             platform (str): Name of the platform to connect to on the provider's servers, e.g. `ibm_osaka`.
         Returns:
             qibo.backends.abstract.Backend: The loaded backend.
         """
 
-        if worker == "qibo-client":
-            return QiboClientBackend(token, provider, platform)
-        elif worker == "qiskit-client":
-            return QiskitClientBackend(token, provider, platform)
+        if service == "qibo-client":
+            return QiboClientBackend(token, platform)
+        elif service == "qiskit-client":
+            return QiskitClientBackend(token, platform)
         else:
             raise_error(
                 ValueError,
-                f"Unsupported worker, please use one among {WORKERS}.",
+                f"Unsupported service, please use one among {SERVICES}.",
             )
 
     def list_available(self, tokens: dict = None) -> dict:
         """Lists all the available qibo cloud backends.
 
         Args:
-            tokens (dict): Mapping between the workers and their tokens, e.g.
+            tokens (dict): Mapping between the services and their tokens, e.g.
                            {"qibo-client": "xxxxx", "qiskit-client": "xxxxx"}.
                            By default reads the variables ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN").
         Returns:
@@ -56,12 +55,12 @@ class MetaBackend:
         if tokens is None:
             tokens = {}
         available_backends = {}
-        for worker, token in zip(WORKERS, TOKENS):
+        for service, token in zip(SERVICES, TOKENS):
             try:
-                token = tokens.get(worker, os.environ[token])
-                MetaBackend.load(worker=worker, token=token)
+                token = tokens.get(service, os.environ[token])
+                MetaBackend.load(service=service, token=token)
                 available = True
             except:  # pragma: no cover
                 available = False
-            available_backends[worker] = available
+            available_backends[service] = available
         return available_backends

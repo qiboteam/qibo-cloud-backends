@@ -4,10 +4,6 @@ import qibo_client
 from qibo.backends import NumpyBackend
 from qibo.config import raise_error
 
-PROVIDERS_LIST = [
-    "TII",
-]
-
 
 class QiboClientBackend(NumpyBackend):
     """Backend for the remote execution of Qibo circuits.
@@ -18,7 +14,7 @@ class QiboClientBackend(NumpyBackend):
         platform (str): Name of the platform. Defaults to `"sim"`.
     """
 
-    def __init__(self, token=None, provider=None, platform=None):
+    def __init__(self, token=None, platform=None):
         super().__init__()
         if token is None:
             try:
@@ -28,19 +24,11 @@ class QiboClientBackend(NumpyBackend):
                     RuntimeError,
                     "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `QIBO_CLIENT_TOKEN='your_token'`.",
                 )
-        if provider is None:
-            provider = "TII"
         if platform is None:
             platform = "sim"
         self.platform = platform
         self.name = "qibo-client"
-        self.device = provider
-        if provider not in PROVIDERS_LIST:
-            raise_error(
-                RuntimeError,
-                f"Unsupported provider {provider}, please pick one in {PROVIDERS_LIST}.",
-            )
-        self.client = getattr(qibo_client, provider)(token)
+        self.client = qibo_client.Client(token)
 
     def execute_circuit(self, circuit, initial_state=None, nshots=1000):
         """Executes the passed circuit.
