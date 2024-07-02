@@ -19,9 +19,7 @@ class MetaBackend:
     """Meta-backend class which takes care of loading the qibo-cloud backends."""
 
     @staticmethod
-    def load(
-        service: str, token: str = None, platform: str = None
-    ) -> QibocloudBackend:
+    def load(service: str, token: str = None, platform: str = None) -> QibocloudBackend:
         """Loads the backend.
 
         Args:
