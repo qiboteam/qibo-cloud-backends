@@ -117,7 +117,9 @@ def test_qiskit_client_backend(token):
 def test_qiskit_client_backend_initial_state(measurement):
     nqubits = 3
     c = qiskit_circuit(nqubits, measurement=measurement)
-    client = QiskitClientBackend(token=QISKIT_TK, provider="ibm-q", platform="ibm_osaka")
+    client = QiskitClientBackend(
+        token=QISKIT_TK, provider="ibm-q", platform="ibm_osaka"
+    )
     if measurement:
         state = np.zeros(2**nqubits, dtype=complex)
         with pytest.raises(NotImplementedError):
