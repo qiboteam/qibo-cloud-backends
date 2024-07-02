@@ -42,14 +42,20 @@ class QiboClientBackend(NumpyBackend):
             )
         self.client = getattr(qibo_client, provider)(token)
 
-    def execute_circuit(self, circuit, nshots=1000):
+    def execute_circuit(self, circuit, initial_state=None, nshots=1000):
         """Executes the passed circuit.
 
         Args:
             circuit (qibo.models.Circuit): The circuit to execute.
+            initial_state (ndarray): The initial state of the circuit. Defaults to `|00...0>`.
             nshots (int): Total number of shots.
 
         Returns:
             (qibo.result) The qibo result object containing the outcome of the circuit execution.
         """
+        if initial_state is not None:
+            raise_error(
+                NotImplementedError,
+                "The use of an `initial_state` is not supported yet.",
+            )
         return self.client.run_circuit(circuit, nshots=nshots, device=self.platform)
