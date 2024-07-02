@@ -29,20 +29,16 @@ The following two examples show how to submit a job on the TII cluster and the I
 Prepare a QFT circuit to be submitted to the servers:
 
 ```python
-   from qibo.models import QFT
-   from qibo import gates
+   import qibo
 
    circuit = qibo.models.QFT(5)
-   circuit.add(gates.M(0, 2, 5))
+   circuit.add(qibo.gates.M(0, 2, 4))
 ```
 
 Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
 
 ```python
-
-   from qibo.backends import set_backend
-
-   set_backend("qibo-cloud-backends", worker="qibo-client", token="your_token", provider="TII", platform="sim")
+   qibo.set_backend("qibo-cloud-backends", worker="qibo-client", token="your_token", provider="TII", platform="sim")
    result = circuit()
    print(result.frequencies())
 ```
@@ -50,8 +46,7 @@ Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
 or, in order to run on one of the chips hosted in `ibm-q`, e.g. `ibm_osaka`:
 
 ```python
-
-   set_backend("qibo-cloud-backends", worker="qiskit-client", token="your_token", provider="ibm-q", platform="ibm_osaka")
+   qibo.set_backend("qibo-cloud-backends", worker="qiskit-client", token="your_token", provider="ibm-q", platform="ibm_osaka")
    result = circuit()
    print(result.frequencies())
 ```
