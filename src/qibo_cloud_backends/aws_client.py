@@ -126,7 +126,7 @@ class BraketClientBackend(NumpyBackend):
                                        coupling_map = self.coupling_map)
         transpiled_circuit_qasm = qasm2.dumps(transpiled_circuit) # Convert back to qasm.
         transpiled_circuit_qibo = QiboCircuit.from_qasm(transpiled_circuit_qasm)
-        return transpiled_circuit_qasm, transpiled_circuit_qibo
+        return transpiled_circuit, transpiled_circuit_qasm, transpiled_circuit_qibo
 
     def execute_circuit(self,
                         circuit,
