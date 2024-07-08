@@ -9,7 +9,7 @@ from braket.circuits import (
 from qibo import Circuit as QiboCircuit, gates as qibo_gates
 
 
-def to_braket(qibo_circuit: QiboCircuit, verbatin_circuit: bool) -> BraketCircuit:
+def to_braket(qibo_circuit: QiboCircuit, verbatim_circuit: bool) -> BraketCircuit:
     circuit = BraketCircuit()
 
     # Add gates
