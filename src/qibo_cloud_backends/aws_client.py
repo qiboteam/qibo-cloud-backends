@@ -129,7 +129,7 @@ class BraketClientBackend(NumpyBackend):
         return transpiled_circuit, transpiled_circuit_qasm, transpiled_circuit_qibo
 
     def execute_circuit(self,
-                        circuit,
+                        circuit_qibo,
                         nshots=1000,
                         **kwargs):
         """Executes a Qibo circuit on an AWS Braket device. The device defaults to the LocalSimulator().
@@ -141,7 +141,7 @@ class BraketClientBackend(NumpyBackend):
             Measurement outcomes (qibo.measurement.MeasurementOutcomes): The outcome of the circuit execution.
         """
         
-        measurements = circuit.measurements
+        measurements = circuit_qibo.measurements
         if not measurements:
             raise_error(RuntimeError, "No measurement found in the provided circuit.")
         braket_circuit = to_braket(circuit, self.verbatim_circuit)
@@ -160,7 +160,7 @@ class BraketClientBackend(NumpyBackend):
             
         samples = task.result().measurements
         counts = task.result().measurement_counts
-
+        
         return MeasurementOutcomes(
             measurements=measurements, backend=self, samples=samples, nshots=nshots
         )
