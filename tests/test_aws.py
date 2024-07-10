@@ -16,7 +16,7 @@ def test_aws_client_backend():
     
 
     # Local simulator test, does not cost money
-    client = aws_client.AWSClientBackend()
+    client = aws_client.BraketClientBackend()
     # AWS device tests, cost money
     # AWS = aws_client.AWSClientBackend(device = AwsDevice("arn:aws:braket:eu-west-2::device/qpu/oqc/Lucy"))
     # AWS = aws_client.AWSClientBackend(device = AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1"))

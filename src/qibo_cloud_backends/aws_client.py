@@ -24,21 +24,9 @@ from qiskit import qasm2
 # from qiskit_braket_provider import to_braket as qiskit_to_braket
 
 from braket.aws import AwsDevice, AwsQuantumTask
-from braket.circuits import Gate, observables
-from braket.circuits import Circuit as BraketCircuit
-from braket.devices import Devices, LocalSimulator
+from braket.devices import LocalSimulator
 
 from qibo_cloud_backends.braket_translation import to_braket
-
-# _QASM_BRAKET_GATES = {
-#     "id": "i",
-#     "cx": "cnot",
-#     "sx": "v",
-#     "sxdg": "vi",
-#     "sdg": "si",
-#     "tdg": "ti",
-#     "u3": "U",
-# }
 
 class BraketClientBackend(NumpyBackend):
     def __init__(self, device=None, verbatim_circuit=False):
