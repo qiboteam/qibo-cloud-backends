@@ -91,12 +91,6 @@ def _(_: qibo_gates.SXDG):
 
 
 @_translate_op.register
-def _(g: qibo_gates.PRX):
-    parameters = g.parameters
-    return braket_gates.PRx(parameters[0], parameters[1])
-
-
-@_translate_op.register
 def _(_: qibo_gates.CNOT):
     return braket_gates.CNot()
 
@@ -179,6 +173,12 @@ def _(g: qibo_gates.GPI):
 @_translate_op.register
 def _(g: qibo_gates.GPI2):
     return braket_gates.GPi2(g.parameters[0])
+
+
+@_translate_op.register
+def _(g: qibo_gates.PRX):
+    parameters = g.parameters
+    return braket_gates.PRx(parameters[0], parameters[1])
 
 
 @_translate_op.register
