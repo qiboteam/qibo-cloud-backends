@@ -62,7 +62,7 @@ def test_aws_client_backend():
         (gates.RXX(0, 1, np.pi), BraketCircuit().xx(0, 1, np.pi)),
         (gates.RYY(0, 1, np.pi), BraketCircuit().yy(0, 1, np.pi)),
         (gates.RZZ(0, 1, np.pi), BraketCircuit().zz(0, 1, np.pi)),
-        (gates.RXXYY(0, 1, np.pi), BraketCircuit().xy(0, 1, np.pi)),
+        (gates.RXXYY(0, 1, np.pi), BraketCircuit().xy(0, 1, -np.pi)),
         (gates.GPI(0, np.pi), BraketCircuit().gpi(0, np.pi)),
         (gates.GPI2(0, np.pi), BraketCircuit().gpi2(0, np.pi)),
         (gates.PRX(0, np.pi, np.pi / 2), BraketCircuit().prx(0, np.pi, np.pi / 2)),
