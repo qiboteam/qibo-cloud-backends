@@ -6,10 +6,11 @@ from qibo.config import raise_error
 
 from qibo_cloud_backends.qibo_client import QiboClientBackend
 from qibo_cloud_backends.qiskit_client import QiskitClientBackend
+from qibo_cloud_backends.aws_client import BraketClientBackend
 
 __version__ = im.version(__package__)
 
-QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend]
+QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend, BraketClientBackend]
 
 CLIENTS = ("qibo-client", "qiskit-client")
 TOKENS = ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN")
@@ -34,6 +35,8 @@ class MetaBackend:
             return QiboClientBackend(token, platform)
         elif client == "qiskit-client":
             return QiskitClientBackend(token, platform)
+        elif client == "aws-client":
+            return BraketClientBackend()
         else:
             raise_error(
                 ValueError,
