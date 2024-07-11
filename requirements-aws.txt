@@ -1,1 +1,2 @@
 amazon-braket-sdk
+qiskit-braket-provider
