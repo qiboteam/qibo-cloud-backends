@@ -6,7 +6,7 @@ from qibo.config import raise_error
 
 from qibo_cloud_backends.qibo_client import QiboClientBackend
 from qibo_cloud_backends.qiskit_client import QiskitClientBackend
-from qibo_cloud_backends.aws_client import BraketClientBackend
+from qibo_cloud_backends.braket_client import BraketClientBackend
 
 __version__ = im.version(__package__)
 

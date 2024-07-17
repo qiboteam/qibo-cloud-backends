@@ -4,7 +4,7 @@ from qibo import Circuit
 from qibo import gates
 import numpy as np
 from qibo.quantum_info import random_clifford
-from qibo_cloud_backends.aws_client import BraketClientBackend
+from qibo_cloud_backends.braket_client import BraketClientBackend
 from qibo_cloud_backends.braket_translation import to_braket
 from qibo.backends import NumpyBackend
 

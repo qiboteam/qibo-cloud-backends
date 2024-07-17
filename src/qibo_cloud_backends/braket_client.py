@@ -1,7 +1,6 @@
 from qibo.backends import NumpyBackend
 from qibo.config import raise_error
-from qibo.result import MeasurementOutcomes, QuantumState
-from qibo import gates
+from qibo.result import MeasurementOutcomes
 from qibo import Circuit as QiboCircuit
 # from qibo.transpiler.pipeline import Passes, assert_transpiling
 # from qibo.transpiler.optimizer import Preprocessing
@@ -9,21 +8,13 @@ from qibo import Circuit as QiboCircuit
 # from qibo.transpiler.unroller import Unroller, NativeGates
 # from qibo.transpiler.placer import Random
 
-import re
-import importlib.util
-import sys
 import networkx as nx
 
 # Import Qiskit packages for transpiler
 from qiskit import transpile
 from qiskit import QuantumCircuit
-from qiskit.transpiler import CouplingMap
-from qiskit.circuit.random import random_circuit
 from qiskit import qasm2
 
-# from qiskit_braket_provider import to_braket as qiskit_to_braket
-
-from braket.aws import AwsDevice, AwsQuantumTask
 from braket.devices import LocalSimulator
 
 from qibo_cloud_backends.braket_translation import to_braket
