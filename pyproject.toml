@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "qibo-cloud-backends"
-version = "0.0.3"
+version = "0.0.4"
 description = "Qibo backends for client interface."
 authors = ["The Qibo team"]
 license = "Apache License 2.0"
@@ -20,9 +20,9 @@ classifiers = [
 packages = [{ include = "qibo_cloud_backends", from = "src" }]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
-qibo = ">=0.2.9"
-qibo_client = ">=0.0.4"
+python = ">=3.9,<3.13"
+qibo = "^0.2.9"
+qibo_client = "^0.0.7"
 qiskit_ibm_runtime = ">=0.17"
 qiskit_ibm_provider = ">=0.8.0"
 qiskit_braket_provider = { version = "^0.3.1", optional = true }

@@ -2,14 +2,13 @@ name: Tests
 
 on:
   workflow_dispatch:
-  push:
   merge_group:
   pull_request:
     types: [labeled]
 
 env:
   IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
-  QIBO_CLIENT_TII_TOKEN: ${{ secrets.QIBO_CLIENT_TII_TOKEN }}
+  QIBO_CLIENT_TOKEN: ${{ secrets.QIBO_CLIENT_TOKEN }}
 
 jobs:
   build:

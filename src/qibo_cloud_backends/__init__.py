@@ -24,7 +24,7 @@ class MetaBackend:
         """Loads the backend.
 
         Args:
-            client (str): Name of the cloud client to load, one in ("qibo-client", "qiskit-client").
+            client (str): Name of the cloud client to load, one in ("qibo-client", "qiskit-client", "braket-client").
             token (str): User token for the remote connection.
             platform (str): Name of the platform to connect to on the provider's servers, e.g. `ibm_osaka`.
         Returns:
@@ -35,7 +35,7 @@ class MetaBackend:
             return QiboClientBackend(token, platform)
         elif client == "qiskit-client":
             return QiskitClientBackend(token, platform)
-        elif client == "aws-client":
+        elif client == "braket-client":
             return BraketClientBackend()
         else:
             raise_error(
@@ -65,13 +65,3 @@ class MetaBackend:
                 available = False
             available_backends[client] = available
         return available_backends
-
-
-
-# import importlib.metadata as im
-
-# from qibo_cloud_backends.qibo_client import QiboClientBackend
-# from qibo_cloud_backends.qiskit_client import QiskitClientBackend
-# from qibo_cloud_backends.aws_client import BraketClientBackend
-
-# __version__ = im.version(__package__)

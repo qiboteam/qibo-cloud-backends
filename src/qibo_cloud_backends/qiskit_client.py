@@ -1,8 +1,9 @@
+import os
 from itertools import repeat
 
 from qibo.backends import NumpyBackend
 from qibo.config import raise_error
-from qibo.result import MeasurementOutcomes, QuantumState
+from qibo.result import MeasurementOutcomes
 from qiskit import QuantumCircuit
 from qiskit_ibm_provider import IBMProvider
 
@@ -11,20 +12,24 @@ class QiskitClientBackend(NumpyBackend):
     """Backend for the remote execution of Qiskit circuits on the IBM servers.
 
     Args:
-        token (str): User authentication token.
+        token (str): User authentication token. By default this is read from the 'IBMQ_TOKEN' environment variable.
         provider (str): Name of the IBM service provider. Defaults to `"ibm-q"`.
-        platform (str): The IBM platform. Defaults to `"ibmq_qasm_simulator"`.
+        platform (str): The IBM platform. Defaults to `"ibm_osaka"`.
     """
 
-    def __init__(self, token, provider=None, platform=None):
+    def __init__(self, token=None, platform=None):
         super().__init__()
-        if provider is None:
-            provider = "ibm-q"
+        if token is None:
+            try:
+                token = os.environ["IBMQ_TOKEN"]
+            except KeyError:  # pragma: no cover
+                raise_error(
+                    RuntimeError,
+                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `IBMQ_TOKEN='your_token'`.",
+                )
         if platform is None:
-            platform = "ibmq_qasm_simulator"
-        self.platform = platform
-        self.name = "qiskit"
-        self.device = provider
+            platform = "ibm_osaka"
+        self.name = "qiskit-client"
         provider = IBMProvider(token)
         self.backend = provider.get_backend(platform)
 
@@ -47,7 +52,6 @@ class QiskitClientBackend(NumpyBackend):
         measurements = circuit.measurements
         if not measurements:
             raise_error(RuntimeError, "No measurement found in the provided circuit.")
-        nqubits = circuit.nqubits
         circuit = QuantumCircuit.from_qasm_str(circuit.to_qasm())
         result = self.backend.run(circuit, shots=nshots, **kwargs).result()
         samples = []
