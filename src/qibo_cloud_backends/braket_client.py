@@ -2,11 +2,6 @@ from qibo.backends import NumpyBackend
 from qibo.config import raise_error
 from qibo.result import MeasurementOutcomes
 from qibo import Circuit as QiboCircuit
-# from qibo.transpiler.pipeline import Passes, assert_transpiling
-# from qibo.transpiler.optimizer import Preprocessing
-# from qibo.transpiler.router import ShortestPaths
-# from qibo.transpiler.unroller import Unroller, NativeGates
-# from qibo.transpiler.placer import Random
 
 import networkx as nx
 
@@ -33,18 +28,6 @@ class BraketClientBackend(NumpyBackend):
         super().__init__()
         
         self.verbatim_circuit = verbatim_circuit
-
-        # self.transpilation = transpilation
-        # if transpilation:
-        #     print('Transpile!')
-        #     if coupling_map is None:
-        #         raise_error(ValueError, "Expected qubit_map. E.g. qubit_map = [[0, 1], [0, 7], [1, 2], [2, 3], [4, 3], [4, 5], [6, 5], [7, 6]]")
-        #     else:
-        #         self.coupling_map = coupling_map
-        #     if native_gates is None:
-        #         raise_error(ValueError, "Expected native gates for transpilation. E.g. native_gates = [gates.I, gates.RZ, gates.SX, gates.X, gates.ECR]")
-        #     else:
-        #         self.native_gates = native_gates
 
         self.device = device if device else LocalSimulator()
         self.name = "aws"
