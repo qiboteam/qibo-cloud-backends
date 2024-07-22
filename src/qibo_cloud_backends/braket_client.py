@@ -14,6 +14,7 @@ from braket.devices import LocalSimulator
 
 from qibo_cloud_backends.braket_translation import to_braket
 
+
 class BraketClientBackend(NumpyBackend):
     def __init__(self, device=None, verbatim_circuit=False):
         """Backend for the remote execution of AWS circuits on the AWS backends.
