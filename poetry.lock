@@ -785,6 +785,22 @@ sparktrials = ["pyspark"]
 
 [[package]]
 name = "ibm-cloud-sdk-core"
+version = "3.18.0"
+description = "Core library used by SDKs for IBM Cloud Services"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ibm-cloud-sdk-core-3.18.0.tar.gz", hash = "sha256:bf2b6940761970c14b53fc8fc135af567c58b9709db3214be403a383dd51cabb"},
+]
+
+[package.dependencies]
+PyJWT = ">=2.8.0,<3.0.0"
+python_dateutil = ">=2.8.2,<3.0.0"
+requests = ">=2.31.0,<3.0.0"
+urllib3 = ">=1.26.18,<2.0.0"
+
+[[package]]
+name = "ibm-cloud-sdk-core"
 version = "3.20.0"
 description = "Core library used by SDKs for IBM Cloud Services"
 optional = false
@@ -798,6 +814,19 @@ PyJWT = ">=2.8.0,<3.0.0"
 python_dateutil = ">=2.8.2,<3.0.0"
 requests = ">=2.31.0,<3.0.0"
 urllib3 = ">=2.1.0,<3.0.0"
+
+[[package]]
+name = "ibm-platform-services"
+version = "0.48.0"
+description = "Python client library for IBM Cloud Platform Services"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ibm-platform-services-0.48.0.tar.gz", hash = "sha256:ac4a09ff587191c8d615fb5629fca06ddca056f88e3403c8e08e51141c492e26"},
+]
+
+[package.dependencies]
+ibm_cloud_sdk_core = ">=3.17.0,<4.0.0"
 
 [[package]]
 name = "ibm-platform-services"
@@ -2914,6 +2943,22 @@ files = [
 
 [[package]]
 name = "urllib3"
+version = "1.26.19"
+description = "HTTP library with thread-safe connection pooling, file post, and more."
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
+files = [
+    {file = "urllib3-1.26.19-py2.py3-none-any.whl", hash = "sha256:37a0344459b199fce0e80b0d3569837ec6b6937435c5244e7fd73fa6006830f3"},
+    {file = "urllib3-1.26.19.tar.gz", hash = "sha256:3e3d753a8618b86d7de333b4223005f68720bcd6a7d2bcb9fbd2229ec7c1e429"},
+]
+
+[package.extras]
+brotli = ["brotli (==1.0.9)", "brotli (>=1.0.9)", "brotlicffi (>=0.8.0)", "brotlipy (>=0.6.0)"]
+secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "pyOpenSSL (>=0.14)", "urllib3-secure-extra"]
+socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
+
+[[package]]
+name = "urllib3"
 version = "2.2.2"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
@@ -3086,4 +3131,4 @@ aws = ["amazon-braket-sdk"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "fdf0b2d52f91ff486c93e85a5e4d372722ecef33d144b309c8d617ca3d7908a2"
+content-hash = "45880a6880182c211fc3266b25e35d2a0007e7fb5e18c19a800341b7e718dc47"
