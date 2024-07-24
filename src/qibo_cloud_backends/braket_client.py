@@ -49,6 +49,7 @@ class BraketClientBackend(NumpyBackend):
         self, circuit_qibo, native_gates=None, coupling_map=None, optimization_level=1
     ):
         """Transpiles a Qibo circuit using Qiskit's transpiler. Returns a Qibo circuit.
+        The user may need to do `pip install qiskit` to import the transpiler package.
 
         Args:
             circuit_qibo (qibo.models.Circuit): Qibo circuit to transpile.
