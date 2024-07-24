@@ -1,12 +1,12 @@
+import numpy as np
 import pytest
 from braket.circuits import Circuit as BraketCircuit
-from qibo import Circuit
-from qibo import gates
-import numpy as np
+from qibo import Circuit, gates
+from qibo.backends import NumpyBackend
 from qibo.quantum_info import random_clifford
+
 from qibo_cloud_backends.braket_client import BraketClientBackend
 from qibo_cloud_backends.braket_translation import to_braket
-from qibo.backends import NumpyBackend
 
 NP_BACKEND = NumpyBackend()
 
@@ -16,7 +16,6 @@ def test_aws_client_backend():
     circuit_qibo.add(gates.M(0))
     circuit_qibo.add(gates.M(1))
     circuit_qibo.add(gates.M(2))
-    
 
     # Local simulator test, does not cost money
     client = BraketClientBackend()
@@ -66,9 +65,15 @@ def test_aws_client_backend():
         (gates.GPI(0, np.pi), BraketCircuit().gpi(0, np.pi)),
         (gates.GPI2(0, np.pi), BraketCircuit().gpi2(0, np.pi)),
         (gates.PRX(0, np.pi, np.pi / 2), BraketCircuit().prx(0, np.pi, np.pi / 2)),
-        (gates.MS(0, 1, np.pi, np.pi / 2, np.pi / 4), BraketCircuit().ms(0, 1, np.pi, np.pi / 2, np.pi / 4)),
-        (gates.U3(0, np.pi, np.pi / 2, np.pi / 4), BraketCircuit().u(0, np.pi, np.pi / 2, np.pi / 4)),
-    ]
+        (
+            gates.MS(0, 1, np.pi, np.pi / 2, np.pi / 4),
+            BraketCircuit().ms(0, 1, np.pi, np.pi / 2, np.pi / 4),
+        ),
+        (
+            gates.U3(0, np.pi, np.pi / 2, np.pi / 4),
+            BraketCircuit().u(0, np.pi, np.pi / 2, np.pi / 4),
+        ),
+    ],
 )
 def test_to_braket(gate, expected):
     circuit = Circuit(len(gate.qubits))
@@ -79,4 +84,6 @@ def test_to_braket(gate, expected):
 def test_to_braket_verbatim():
     circuit = Circuit(1)
     circuit.add(gates.PRX(0, np.pi, np.pi / 2))
-    assert to_braket(circuit, True) == BraketCircuit().add_verbatim_box(BraketCircuit().prx(0, np.pi, np.pi / 2))
+    assert to_braket(circuit, True) == BraketCircuit().add_verbatim_box(
+        BraketCircuit().prx(0, np.pi, np.pi / 2)
+    )

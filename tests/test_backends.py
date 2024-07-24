@@ -12,7 +12,12 @@ from qibo.backends import (
 )
 from qibo.quantum_info import random_clifford
 
-from qibo_cloud_backends import MetaBackend, QiboClientBackend, QiskitClientBackend, BraketClientBackend
+from qibo_cloud_backends import (
+    BraketClientBackend,
+    MetaBackend,
+    QiboClientBackend,
+    QiskitClientBackend,
+)
 
 NP_BACKEND = NumpyBackend()
 QISKIT_TK = os.environ.get("IBMQ_TOKEN")

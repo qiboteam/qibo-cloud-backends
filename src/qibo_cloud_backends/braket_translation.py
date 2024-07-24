@@ -1,12 +1,10 @@
 from functools import singledispatch
 
-from braket.circuits import (
-    Circuit as BraketCircuit,
-    gates as braket_gates,
-    Instruction
-)
-
-from qibo import Circuit as QiboCircuit, gates as qibo_gates
+from braket.circuits import Circuit as BraketCircuit
+from braket.circuits import Instruction
+from braket.circuits import gates as braket_gates
+from qibo import Circuit as QiboCircuit
+from qibo import gates as qibo_gates
 
 
 def to_braket(qibo_circuit: QiboCircuit, verbatim_circuit: bool) -> BraketCircuit:
@@ -196,5 +194,3 @@ def _(g: qibo_gates.U3):
 @_translate_op.register
 def _(g: qibo_gates.Unitary):
     return braket_gates.Unitary(g.matrix())
-
-    
