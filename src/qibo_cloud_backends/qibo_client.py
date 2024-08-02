@@ -46,4 +46,5 @@ class QiboClientBackend(NumpyBackend):
                 NotImplementedError,
                 "The use of an `initial_state` is not supported yet.",
             )
-        return self.client.run_circuit(circuit, nshots=nshots, device=self.platform)
+        job = self.client.run_circuit(circuit, nshots=nshots, device=self.platform)
+        return job.result(verbose=0)
