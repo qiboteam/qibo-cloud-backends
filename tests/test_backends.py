@@ -89,6 +89,7 @@ def test_list_available_backends():
         "qibolab": False,
         "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
         "qibotn": False,
+        "qulacs": False,
     }
     assert list_available_backends() == available_backends
 
