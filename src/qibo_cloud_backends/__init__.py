@@ -19,19 +19,22 @@ class MetaBackend:
     """Meta-backend class which takes care of loading the qibo-cloud backends."""
 
     @staticmethod
-    def load(client: str, token: str = None, platform: str = None) -> QibocloudBackend:
+    def load(
+        client: str, token: str = None, platform: str = None, verbosity: bool = False
+    ) -> QibocloudBackend:
         """Loads the backend.
 
         Args:
             client (str): Name of the cloud client to load, one in ("qibo-client", "qiskit-client").
             token (str): User token for the remote connection.
             platform (str): Name of the platform to connect to on the provider's servers, e.g. `ibm_osaka`.
+            verbosity (bool): Enable verbose mode for the qibo-client. Default is False.
         Returns:
             qibo.backends.abstract.Backend: The loaded backend.
         """
 
         if client == "qibo-client":
-            return QiboClientBackend(token, platform)
+            return QiboClientBackend(token, platform, verbosity)
         elif client == "qiskit-client":
             return QiskitClientBackend(token, platform)
         else:

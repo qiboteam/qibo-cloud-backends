@@ -10,11 +10,11 @@ class QiboClientBackend(NumpyBackend):
 
     Args:
         token (str): User authentication token. By default this is read from the 'QIBO_CLIENT_TOKEN' environment variable.
-        provider (str): Name of the service provider. Defaults to `"TII"`.
         platform (str): Name of the platform. Defaults to `"sim"`.
+        verbosity (str): Enable verbose mode for the client. Default is False.
     """
 
-    def __init__(self, token=None, platform=None):
+    def __init__(self, token=None, platform=None, verbosity=False):
         super().__init__()
         if token is None:
             try:
@@ -28,6 +28,7 @@ class QiboClientBackend(NumpyBackend):
             platform = "sim"
         self.platform = platform
         self.name = "qibo-client"
+        self.verbosity = verbosity
         self.client = qibo_client.Client(token)
 
     def execute_circuit(self, circuit, initial_state=None, nshots=1000):
@@ -46,4 +47,5 @@ class QiboClientBackend(NumpyBackend):
                 NotImplementedError,
                 "The use of an `initial_state` is not supported yet.",
             )
-        return self.client.run_circuit(circuit, nshots=nshots, device=self.platform)
+        job = self.client.run_circuit(circuit, nshots=nshots, device=self.platform)
+        return job.result(verbose=self.verbosity)
