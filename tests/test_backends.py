@@ -80,7 +80,6 @@ def test_set_backend(backend, token):
         assert GlobalBackend().name == backend
 
 
-@pytest.mark.skip(reason="Requires bugfix in qibo.")
 def test_list_available_backends():
     available_backends = {
         "numpy": True,
