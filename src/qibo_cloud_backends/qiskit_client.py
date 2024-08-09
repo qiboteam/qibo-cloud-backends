@@ -13,7 +13,6 @@ class QiskitClientBackend(NumpyBackend):
 
     Args:
         token (str): User authentication token. By default this is read from the 'IBMQ_TOKEN' environment variable.
-        provider (str): Name of the IBM service provider. Defaults to `"ibm-q"`.
         platform (str): The IBM platform. Defaults to `"ibm_osaka"`.
     """
 

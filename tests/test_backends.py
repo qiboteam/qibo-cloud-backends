@@ -90,12 +90,10 @@ def test_list_available_backends():
         "numpy": True,
         "tensorflow": False,
         "pytorch": False,
-        "qibojit": False,
-        "qibolab": False,
+        "qulacs": False,
         "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
-        "qibotn": False,
     }
-    assert list_available_backends() == available_backends
+    assert list_available_backends("qibo-cloud-backends") == available_backends
 
 
 @pytest.mark.skipif(
