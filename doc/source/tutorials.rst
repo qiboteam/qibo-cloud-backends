@@ -3,17 +3,72 @@
 Using Braket Client
 -------------------
 
+
 Registering for an AWS Account
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The usage of the AWS Braket LocalSimulator does not require an account. However, to use AWS Braket devices such as the statevector simulator and hardware, the user needs to register for an account here: https://signin.aws.amazon.com/signup?request_type=register.
+The usage of the Amazon Braket LocalSimulator does not require an account. However, to use Amazon Braket devices such as the statevector simulator and hardware, the user needs to register for an account here: https://signin.aws.amazon.com/signup?request_type=register.
 
-Extracting AWS Braket device parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The user also needs to ensure the prerequisites have been configured. More information can be found here: https://github.com/amazon-braket/amazon-braket-sdk-python#prerequisites.
 
-In this tutorial, we will learn how to set the `backend` parameter to the BraketClientBackend and use two devices, the LocalSimulator as well as the IQM device Garnet. More information on Garnet here: https://aws.amazon.com/braket/quantum-computers/iqm/.
 
-To use BraketClientBackend, one needs to import these packages first.
+Submit a circuit
+^^^^^^^^^^^^^^^^
+
+In this example, we will demonstrate how to submit a Qibo circuit onto an AWS device. We will use IQM Garnet as an example. This is where verbatim circuit is set to false, `verbatim_circuit=False`, on an AWS device. Note that when `verbatim_circuit=False`, the transpilation of the input circuit and assignment of the best qubits to use will be left to the device.
+
+.. code-block:: python
+
+   from qibo import gates, Circuit as QiboCircuit
+   import numpy as np
+
+   c = QiboCircuit(2)
+   c.add(gates.H(0))
+   c.add(gates.CNOT(0, 1))
+   c.add(gates.M(0))
+   c.add(gates.M(1))
+
+   print(c.draw())
+
+We should get this circuit:
+
+.. code-block:: python
+
+   q0: -H-o-M-
+   q1: ---x-M-
+
+Now, we initialize the Amazon Braket device and execute circuit `c` on the backend `AWS`.
+
+.. code-block:: python
+
+   device = AwsDevice('arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet')
+   AWS = BraketClientBackend(device = device, verbatim_circuit=False)
+
+   counts = AWS.execute_circuit(c, nshots=1000).frequencies()
+   print(counts)
+
+For completeness, one can also use the LocalSimulator to execute circuit `c` as follows.
+
+.. code-block:: python
+
+   device = LocalSimulator("default")
+   AWS = BraketClientBackend(device = device, verbatim_circuit=False)
+
+   counts = AWS.execute_circuit(c, nshots=1000).frequencies()
+   print(counts)
+
+
+Submit a circuit in verbatim mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Before submitting a Qibo circuit in verbatim mode, it is important to extract the device  Amazon Braket device information. We will demonstrate how to extract th
+
+Extracting Amazon Braket device parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+More information on IQM Garnet device can be found here: https://aws.amazon.com/braket/quantum-computers/iqm/.
+
+To use BraketClientBackend, we import these packages first.
 
 .. code-block:: python
 
@@ -39,55 +94,9 @@ The qubit connectivity on the IQM Garnet device can be drawn using networkx as f
 
    nx.draw(G, pos=nx.spring_layout(G), with_labels=True, node_color='lightblue', node_size=500, font_size=10, font_weight='bold', edge_color='gray')
 
-Executing a circuit without verbatim mode
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Let us run a circuit with `verbatim_circuit=False` on an AWS device. We will use IQM Garnet as an example. Note that when `verbatim_circuit=False`, the transpilation of the input circuit and assignment of the best qubits to use will be left to the device.
-
-.. code-block:: python
-
-   from qibo import gates, Circuit as QiboCircuit
-   import numpy as np
-
-   c = QiboCircuit(2)
-   c.add(gates.H(0))
-   c.add(gates.CNOT(0, 1))
-   c.add(gates.M(0))
-   c.add(gates.M(1))
-
-   print(c.draw())
-
-We should get this circuit:
-
-.. code-block:: python
-
-   q0: -H-o-M-
-   q1: ---x-M-
-
-Now, we initialize the AWS device and execute circuit `c` on the backend `AWS`.
-
-.. code-block:: python
-
-   device = AwsDevice('arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet')
-   AWS = BraketClientBackend(device = device, verbatim_circuit=False)
-
-   counts = AWS.execute_circuit(c, nshots=1000).frequencies()
-   print(counts)
-
-For completeness, one can also use the LocalSimulator to execute circuit `c` as follows.
-
-.. code-block:: python
-
-   device = device = LocalSimulator("default")
-   AWS = BraketClientBackend(device = device, verbatim_circuit=False)
-
-   counts = AWS.execute_circuit(c, nshots=1000).frequencies()
-   print(counts)
-
-
-
-Executing a circuit in verbatim mode
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Submit the circuit
+~~~~~~~~~~~~~~~~~~
 
 Let us run a circuit with `verbatim_circuit=True` on an AWS device, using IQM Garnet as an example. Here, when `verbatim_circuit=True`, the circuit is submitted as is onto the AWS device. The device expects to receive a circuit that is written in native gates with qubits in the range of the device. For IQM Garnet, the native gates are `CZ` and `PRX` gates. IQM Garnet has qubits indexed from 1 to 20.
 
@@ -138,10 +147,11 @@ For completeness, one can also use the LocalSimulator to execute circuit `c` as 
    counts = AWS.execute_circuit(c, nshots=1000).frequencies()
    print(counts)
 
-Using Zero Noise Extrapolation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this example, we illustrate the use of Zero Noise Extrapolation (ZNE) to improve the results of a Quantum Approximate Optimization Algorithm (QAOA) circuit. The circuit solves a trivial MaxCut problem with a single QAOA layer.
+Example: Using Zero Noise Extrapolation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this example, we illustrate the use of Zero Noise Extrapolation (ZNE) to improve the results of a Quantum Approximate Optimization Algorithm (QAOA) circuit. The circuit solves a trivial MaxCut problem with a single QAOA layer. The backend for ZNE is set to an Amazon Braket device.
 
 Here, we make several assumptions:
 1. The user is able to transpile any Qibo circuit with IQM Garnet's qubit topology.
@@ -214,7 +224,7 @@ We define the Hamiltonian, `obs`. The `obs` has to be written according to the q
    obs = 2.5 - 0.5*Z(3)*Z(9) - 0.5*Z(4)*Z(3) - 0.5*Z(4)*Z(5) - 0.5*Z(4)*Z(9) - 0.5*Z(9)*Z(5)
    obs = SymbolicHamiltonian(obs, nqubits=c.nqubits, backend=NumpyBackend())
 
-Finally, we can run ZNE by setting the backend to the AWS to obtain the estimated (extrapolated) result.
+Finally, we can run ZNE by setting the backend to the `AWS` to obtain the estimated (extrapolated) result.
 
 .. code-block:: python
 
@@ -232,4 +242,4 @@ Finally, we can run ZNE by setting the backend to the AWS to obtain the estimate
    print(estimate)
 
 .. note::
-   Running circuits on an AWS Braket device (other than LocalSimulator) incurs cost. The prices can be found on https://aws.amazon.com/braket/pricing/.
+   Running circuits on an Amazon Braket device (other than LocalSimulator) incurs cost. The prices can be found on https://aws.amazon.com/braket/pricing/.

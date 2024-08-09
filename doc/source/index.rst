@@ -61,6 +61,7 @@ or, in order to use the `ibm_osaka` platform on the IBM `ibm-q` server:
    result = circuit()
    print(result.frequencies())
 
+To use Amazon Braket devices, refer to :ref:`tutorials` for a tutorial on using the Braket client.
 
 API Reference
 =============
