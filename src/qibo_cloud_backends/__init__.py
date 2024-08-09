@@ -4,12 +4,13 @@ from typing import Union
 
 from qibo.config import raise_error
 
+from qibo_cloud_backends.braket_client import BraketClientBackend
 from qibo_cloud_backends.qibo_client import QiboClientBackend
 from qibo_cloud_backends.qiskit_client import QiskitClientBackend
 
 __version__ = im.version(__package__)
 
-QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend]
+QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend, BraketClientBackend]
 
 CLIENTS = ("qibo-client", "qiskit-client")
 TOKENS = ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN")
@@ -25,7 +26,7 @@ class MetaBackend:
         """Loads the backend.
 
         Args:
-            client (str): Name of the cloud client to load, one in ("qibo-client", "qiskit-client").
+            client (str): Name of the cloud client to load, one in ("qibo-client", "qiskit-client", "braket-client").
             token (str): User token for the remote connection.
             platform (str): Name of the platform to connect to on the provider's servers, e.g. `ibm_osaka`.
             verbosity (bool): Enable verbose mode for the qibo-client. Default is False.
@@ -37,6 +38,8 @@ class MetaBackend:
             return QiboClientBackend(token, platform, verbosity)
         elif client == "qiskit-client":
             return QiskitClientBackend(token, platform)
+        elif client == "braket-client":
+            return BraketClientBackend()
         else:
             raise_error(
                 ValueError,
