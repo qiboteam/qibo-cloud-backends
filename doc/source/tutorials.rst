@@ -17,6 +17,16 @@ Submit a circuit
 
 In this example, we will demonstrate how to submit a Qibo circuit onto an AWS device. We will use IQM Garnet as an example. This is where verbatim circuit is set to false, `verbatim_circuit=False`, on an AWS device. Note that when `verbatim_circuit=False`, the transpilation of the input circuit and assignment of the best qubits to use will be left to the device.
 
+To use BraketClientBackend, we import these packages first.
+
+.. code-block:: python
+
+   from braket.aws import AwsDevice
+   from braket.devices import Devices, LocalSimulator
+   from qibo_cloud_backend.braket_client import BraketClientBackend
+
+Then, construct a Qibo circuit.
+
 .. code-block:: python
 
    from qibo import gates, Circuit as QiboCircuit
@@ -61,7 +71,8 @@ For completeness, one can also use the LocalSimulator to execute circuit `c` as 
 Submit a circuit in verbatim mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Before submitting a Qibo circuit in verbatim mode, it is important to extract the device  Amazon Braket device information. We will demonstrate how to extract th
+In verbatim mode, the circuit is executed on the device without any transpilation. The user has to ensure that the circuit is specifically written in the device's native gates and gates obey the topology of the device.
+Therefore, before submitting a Qibo circuit in verbatim mode, it is recommended to extract the Amazon Braket device's information. We will demonstrate this below.
 
 Extracting Amazon Braket device parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +87,7 @@ To use BraketClientBackend, we import these packages first.
    from braket.devices import Devices, LocalSimulator
    from qibo_cloud_backend.braket_client import BraketClientBackend
 
-The qubit connectivity on the IQM Garnet device can be drawn using networkx as follows. We will also extract the device's native gates.
+The qubit connectivity on the IQM Garnet device can be visualised using networkx. We will also extract the device's native gates.
 
 .. code-block:: python
 
@@ -125,7 +136,7 @@ We should get this circuit:
    q3: -----|-------
    q4: -prx-o-M-----
 
-Since IQM Garnet has qubits indexed from 1 to 20, we will intentionally leave qubit `q0` empty. An error will be raised if there are gates on any qubits not in the range from 1 to 20.
+Since IQM Garnet has qubits indexed from 1 to 20, we will intentionally leave qubit `q0` empty without any gates. An error will be raised if there are gates on any qubits not in the range from 1 to 20.
 
 Now, we initialize the AWS device and execute circuit `c` on the backend `AWS`.
 
@@ -217,7 +228,7 @@ With these assumptions met, we provide an example circuit `c` below is written i
    c.add(gates.M(4))
    c.add(gates.M(5))
 
-We define the Hamiltonian, `obs`. The `obs` has to be written according to the qubit mapping applied for circuit `c`.
+We define the problem Hamiltonian of QAOA for MaxCut, `obs`. The `obs` has to be written according to the qubit mapping applied for circuit `c`.
 
 .. code-block:: python
 
@@ -242,4 +253,4 @@ Finally, we can run ZNE by setting the backend to the `AWS` to obtain the estima
    print(estimate)
 
 .. note::
-   Running circuits on an Amazon Braket device (other than LocalSimulator) incurs cost. The prices can be found on https://aws.amazon.com/braket/pricing/.
+   Running circuits on an Amazon Braket device (other than LocalSimulator) incurs cost. The pricing can be found on https://aws.amazon.com/braket/pricing/.
