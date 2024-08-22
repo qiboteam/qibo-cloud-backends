@@ -15,7 +15,7 @@ The user also needs to ensure the prerequisites have been configured. More infor
 Submit a circuit
 ^^^^^^^^^^^^^^^^
 
-In this example, we will demonstrate how to submit a Qibo circuit onto an AWS device. We will use IQM Garnet as an example. This is where verbatim circuit is set to false, `verbatim_circuit=False`, on an AWS device. Note that when `verbatim_circuit=False`, the transpilation of the input circuit and assignment of the best qubits to use will be left to the device.
+In this example, we will demonstrate how to submit a Qibo circuit onto an Amazon Braket device. We will use IQM Garnet as an example. This is where verbatim circuit is set to false, `verbatim_circuit=False`, on an Amazon Braket device. Note that when `verbatim_circuit=False`, the transpilation of the input circuit and assignment of the best qubits to use will be left to the device.
 
 To use BraketClientBackend, we import these packages first.
 
@@ -109,7 +109,7 @@ The qubit connectivity on the IQM Garnet device can be visualised using networkx
 Submit the circuit
 ~~~~~~~~~~~~~~~~~~
 
-Let us run a circuit with `verbatim_circuit=True` on an AWS device, using IQM Garnet as an example. Here, when `verbatim_circuit=True`, the circuit is submitted as is onto the AWS device. The device expects to receive a circuit that is written in native gates with qubits in the range of the device. For IQM Garnet, the native gates are `CZ` and `PRX` gates. IQM Garnet has qubits indexed from 1 to 20.
+Let us run a circuit with `verbatim_circuit=True` on an Amazon Braket device, using IQM Garnet as an example. Here, when `verbatim_circuit=True`, the circuit is submitted as is onto the Amazon Braket device. The device expects to receive a circuit that is written in native gates with qubits in the range of the device. For IQM Garnet, the native gates are `CZ` and `PRX` gates. IQM Garnet has qubits indexed from 1 to 20.
 
 .. code-block:: python
 
@@ -138,7 +138,7 @@ We should get this circuit:
 
 Since IQM Garnet has qubits indexed from 1 to 20, we will intentionally leave qubit `q0` empty without any gates. An error will be raised if there are gates on any qubits not in the range from 1 to 20.
 
-Now, we initialize the AWS device and execute circuit `c` on the backend `AWS`.
+Now, we initialize the Amazon Braket device and execute circuit `c` on the backend `AWS`.
 
 .. code-block:: python
 
