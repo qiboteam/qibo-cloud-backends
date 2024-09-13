@@ -1,4 +1,4 @@
-import networkx as nx
+from braket.aws import AwsDevice
 from braket.devices import LocalSimulator
 from qibo import Circuit as QiboCircuit
 from qibo.backends import NumpyBackend
@@ -23,7 +23,7 @@ class BraketClientBackend(NumpyBackend):
 
         self.verbatim_circuit = verbatim_circuit
 
-        self.device = Aws(device) if device else LocalSimulator()
+        self.device = AwsDevice(device) if device else LocalSimulator()
         self.name = "aws"
 
     def execute_circuit(self, circuit_qibo, nshots=1000, **kwargs):
