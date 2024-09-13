@@ -5,9 +5,6 @@ from qibo.backends import NumpyBackend
 from qibo.config import raise_error
 from qibo.result import MeasurementOutcomes
 
-# Import Qiskit packages for transpiler
-from qiskit import QuantumCircuit, qasm2, transpile
-
 from qibo_cloud_backends.braket_translation import to_braket
 
 
@@ -16,9 +13,9 @@ class BraketClientBackend(NumpyBackend):
         """Backend for the remote execution of AWS circuits on the AWS backends.
 
         Args:
-            device (str): The ARN of the Braket device. Defaults to Braket's statevector LocalSimulator, LocalSimulator("default").
-                          Other devices are Braket's density matrix simulator, LocalSimulator("braket_dm"), or any other
-                          QPUs.
+            device (str): The string representing the ARN of the Braket device. Defaults to Braket's statevector LocalSimulator,
+                          LocalSimulator("default"). Other devices are Braket's density matrix simulator,
+                          LocalSimulator("braket_dm"), or any other QPUs.
             verbatim_circuit (bool): If `True`, to_braket will wrap the Braket circuit in a verbatim box to run it on the QPU
                                      without any transpilation. Defaults to `False`.
         """
@@ -26,78 +23,8 @@ class BraketClientBackend(NumpyBackend):
 
         self.verbatim_circuit = verbatim_circuit
 
-        self.device = device if device else LocalSimulator()
+        self.device = Aws(device) if device else LocalSimulator()
         self.name = "aws"
-
-    @staticmethod
-    def custom_connectivity(coupling_map):
-        """Converts a coupling map given in list form to a networkx graph. Returns networkx graph.
-
-        Args:
-            coupling_map (list): E.g. [[0, 1], [0, 7], [1, 2], [2, 3], [4, 3], [4, 5], [6, 5], [7, 6]]
-        Returns:
-            graph (networkx graph): graph
-        """
-
-        graph = nx.Graph()
-        for connection in coupling_map:
-            q1, q2 = connection
-            graph.add_edge(q1, q2)
-        return graph
-
-    def transpile_qibo_to_qibo_with_qiskit(
-        self, circuit_qibo, native_gates=None, coupling_map=None, optimization_level=1
-    ):
-        """Transpiles a Qibo circuit using Qiskit's transpiler. Returns a Qibo circuit.
-        The user may need to do `pip install qiskit` to import the transpiler package.
-
-        Args:
-            circuit_qibo (qibo.models.Circuit): Qibo circuit to transpile.
-            native_gates (list, str): e.g. ['ecr', 'i', 'rz', 'sx', 'x']. IQM uses ['cz', 'prx'].
-            coupling_map (list, list): E.g. [[0, 1], [0, 7], [1, 2], [2, 3], [4, 3], [4, 5], [6, 5], [7, 6]]
-            optimization_level (int): Optimization level for Qiskit's transpiler. Range is from 0 to 3. Defaults to 1.
-
-        Returns:
-            transpiled_circuit_qasm (OpenQASM circuit, str): Transpiled circuit in OpenQASM format.
-            transpiled_circuit_qibo (qibo.models.Circuit): Qibo circuit that has been transpiled.
-        """
-
-        print("Transpile qibo to qibo using qiskit transpiler")
-
-        if coupling_map is None:
-            raise_error(
-                ValueError,
-                "Expected qubit_map. E.g. qubit_map = [[0, 1], [0, 7], [1, 2], [2, 3], [4, 3], [4, 5], [6, 5], [7, 6]]",
-            )
-        else:
-            self.coupling_map = coupling_map
-
-        if native_gates is None:
-            raise_error(
-                ValueError,
-                "Expected native gates for transpilation. E.g. native_gates = ['ecr', 'i', 'rz', 'sx', 'x']",
-            )
-        else:
-            self.native_gates = native_gates
-
-        if optimization_level < 0 or optimization_level > 3:
-            raise_error(ValueError, "Optimization_level is between 0 to 3.")
-        else:
-            self.optimization_level = optimization_level
-
-        circuit_qasm = circuit_qibo.to_qasm()
-        circuit_qiskit = QuantumCircuit.from_qasm_str(circuit_qasm)
-        transpiled_circuit = transpile(
-            circuit_qiskit,
-            basis_gates=self.native_gates,
-            optimization_level=self.optimization_level,
-            coupling_map=self.coupling_map,
-        )
-        transpiled_circuit_qasm = qasm2.dumps(
-            transpiled_circuit
-        )  # Convert back to qasm.
-        transpiled_circuit_qibo = QiboCircuit.from_qasm(transpiled_circuit_qasm)
-        return transpiled_circuit, transpiled_circuit_qasm, transpiled_circuit_qibo
 
     def execute_circuit(self, circuit_qibo, nshots=1000, **kwargs):
         """Executes a Qibo circuit on an AWS Braket device. The device defaults to the LocalSimulator().
