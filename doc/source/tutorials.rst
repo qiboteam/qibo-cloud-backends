@@ -51,7 +51,7 @@ Now, we initialize the Amazon Braket device and execute circuit `c` on the backe
 
 .. code-block:: python
 
-   device = AwsDevice('arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet')
+   device = "arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet"
    AWS = BraketClientBackend(device = device, verbatim_circuit=False)
 
    counts = AWS.execute_circuit(c, nshots=1000).frequencies()
@@ -93,7 +93,7 @@ The qubit connectivity on the IQM Garnet device can be visualised using networkx
 
    import networkx as nx
 
-   device = 'arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet'
+   device = "arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet"
    connectivity_graph = AwsDevice(device).properties.paradigm.connectivity.connectivityGraph
    native_gates = AwsDevice(device).properties.paradigm.nativeGateSet
    print(native_gates)
@@ -142,7 +142,7 @@ Now, we initialize the Amazon Braket device and execute circuit `c` on the backe
 
 .. code-block:: python
 
-   device = AwsDevice('arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet')
+   device = "arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet"
    AWS = BraketClientBackend(device = device, verbatim_circuit=True)
 
    counts = AWS.execute_circuit(c, nshots=1000).frequencies()
@@ -152,7 +152,7 @@ For completeness, one can also use the LocalSimulator to execute circuit `c` as 
 
 .. code-block:: python
 
-   device = device = LocalSimulator("default")
+   device = LocalSimulator("default")
    AWS = BraketClientBackend(device = device, verbatim_circuit=True)
 
    counts = AWS.execute_circuit(c, nshots=1000).frequencies()
