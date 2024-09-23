@@ -125,10 +125,11 @@ def test_qiskit_client_backend_initial_state(measurement):
             client.execute_circuit(c)
 
 
+@pytest.mark.parametrize("verbatim", [True, False])
 def test_braket_client_backend():
     c = random_clifford(3, backend=NP_BACKEND)
     c.add(gates.M(0, 2))
-    client = BraketClientBackend(verbatim_circuit=False)
+    client = BraketClientBackend(verbatim_circuit=verbatim)
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
     NP_BACKEND.assert_allclose(
