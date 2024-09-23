@@ -1,3 +1,5 @@
+import time
+
 from braket.aws import AwsDevice
 from braket.devices import LocalSimulator
 from qibo import Circuit as QiboCircuit
@@ -9,7 +11,7 @@ from qibo_cloud_backends.braket_translation import to_braket
 
 
 class BraketClientBackend(NumpyBackend):
-    def __init__(self, device=None, verbatim_circuit=False):
+    def __init__(self, device=None, verbatim_circuit=False, monitoring=False):
         """Backend for the remote execution of AWS circuits on the AWS backends.
 
         Args:
@@ -22,6 +24,7 @@ class BraketClientBackend(NumpyBackend):
         super().__init__()
 
         self.verbatim_circuit = verbatim_circuit
+        self.monitoring = monitoring
 
         self.device = AwsDevice(device) if device else LocalSimulator()
         self.name = "aws"
@@ -43,15 +46,16 @@ class BraketClientBackend(NumpyBackend):
 
         task = self.device.run(braket_circuit, shots=nshots)
 
-        # Monitoring: get ID and status of submitted task
-        task_id = task.id
-        status = task.state()
-        print("ID of task:", task_id)
-        print("Status of task:", status)
-        # wait for job to complete
-        while status != "COMPLETED":
+        while self.monitoring:
             status = task.state()
-            print("Status:", status)
+            print(f"> Status {status}", end=" ", flush=True)
+            if status == "COMPLETED":
+                print("\n")
+                break
+            for _ in range(3):
+                time.sleep(1)
+                print(".", end=" ", flush=True)
+            print("\r" + " " * 30, end="\r")
 
         samples = task.result().measurements
 
