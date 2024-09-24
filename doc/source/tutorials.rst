@@ -4,6 +4,8 @@ Using Braket Client
 -------------------
 
 
+.. _register_account:
+
 Registering for an AWS Account
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -11,6 +13,8 @@ The usage of the Amazon Braket LocalSimulator does not require an account. Howev
 
 The user also needs to ensure the prerequisites have been configured. More information can be found here: https://github.com/amazon-braket/amazon-braket-sdk-python#prerequisites.
 
+
+.. _execute_a_circuit:
 
 Submit a circuit
 ^^^^^^^^^^^^^^^^
@@ -75,11 +79,15 @@ To monitor the status of a circuit that is executed, especially on an Amazon Bra
    print(counts)
 
 
+.. _execute_in_verbatim_mode:
+
 Submit a circuit in verbatim mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In verbatim mode, the circuit is executed on the device without any transpilation. The user has to ensure that the circuit is specifically written in the device's native gates and gates respect the topology of the device.
 Therefore, before submitting a Qibo circuit in verbatim mode, it is recommended to extract the Amazon Braket device's information. We will demonstrate this below.
+
+.. _Amazon_Braket_parameters:
 
 Extracting Amazon Braket device parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -105,8 +113,6 @@ The Amazon Braket devices can be found here: https://aws.amazon.com/braket/quant
 
 Submit the circuit
 ~~~~~~~~~~~~~~~~~~
-
-Let us run a circuit with `verbatim_circuit=True` on an Amazon Braket device, using IQM Garnet as an example. Here, when `verbatim_circuit=True`, the circuit is submitted as is onto the Amazon Braket device. The device expects to receive a circuit that is written in native gates with qubits in the range of the device. For IQM Garnet, the native gates are `CZ` and `PRX` gates. IQM Garnet has qubits indexed from 1 to 20.
 
 Let us run a circuit with `verbatim_circuit=True` on an Amazon Braket device, using IQM Garnet as an example. When `verbatim_circuit=True`, the circuit is submitted as is onto the Amazon Braket device. The device expects to receive a circuit composed of its native gates only and with entangling gates that respect its connectivity (entangling gates can be executed only on qubit pairs that are physically connected on the chip). For IQM Garnet, for instance, the native gates are `CZ` and `PRX` and the connectivity is a square lattice of 20 qubits.
 
@@ -148,16 +154,42 @@ Now, we initialize the `BraketClientBackend` with the `Garnet` device and execut
    print(counts)
 
 
+.. _ZNE_example:
+
 Example: Using Zero Noise Extrapolation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this example, we illustrate the use of Zero Noise Extrapolation (ZNE) to improve the results of a Quantum Approximate Optimization Algorithm (QAOA) circuit. The circuit solves a trivial MaxCut problem with a single QAOA layer. We just need to set up `qibo`'s `ZNE <https://qibo.science/qibo/stable/api-reference/qibo.html#zero-noise-extrapolation-zne>`_ routine with our initialized `BraketClientBackend`.
+In this example, we illustrate the use of Zero Noise Extrapolation (ZNE) to improve the results of a Quantum Approximate Optimization Algorithm (QAOA) circuit. The circuit solves a trivial MaxCut problem with a single QAOA layer. We just need to set up Qibo's `ZNE <https://qibo.science/qibo/stable/api-reference/qibo.html#zero-noise-extrapolation-zne>`_ routine with our initialized `BraketClientBackend`.
 
 Here, we make several assumptions:
-1. The user is able to transpile any Qibo circuit with IQM Garnet's qubit topology.
+
+1. The user is able to transpile any Qibo circuit to fit IQM Garnet's qubit topology.
+
 2. The optimal angles for the single QAOA layer are known.
 
-With these assumptions met, we provide an example circuit `c` below is written in IQM Garnet's native gates with specific qubits. The parameters for the `PRX` gates are optimal. We select `verbatim_circuit=True` as we do not want the device to transpile the circuit.
+With these assumptions met, we then transpile the QAOA circuit that looks like this
+
+.. code-block:: python
+
+   q0: -H-o----o-o----o-o----o---------------RX-M-
+   q1: -H-X-RZ-X-|----|-|----|-o----o--------RX-M-
+   q2: -H--------X-RZ-X-|----|-X-RZ-X-o----o-RX-M-
+   q3: -H---------------X-RZ-X--------X-RZ-X-RX-M-
+
+to the following circuit `c` written in IQM Garnet's native gates, targeting specific qubits that respect the topology shown in :ref:`IQM_Garnet_topology`. The optimal parameters for the `RZ` and `RX` gates are not shown in this circuit above.
+
+The topology was obtained using the code in the section :ref:`Amazon_Braket_parameters`. The parameters for the `PRX` gates are optimal. We select `verbatim_circuit=True` as we do not want the device to transpile the circuit.
+
+.. _IQM_Garnet_topology:
+
+.. figure:: IQM_Garnet_topology.png
+   :alt: IQM Garnet topology.
+   :align: center
+   :width: 600px
+
+   Figure 1: IQM Garnet topology.
+
+Writing the transpiled circuit `c` in full, we have:
 
 .. code-block:: python
 
@@ -214,14 +246,14 @@ With these assumptions met, we provide an example circuit `c` below is written i
    c.add(gates.PRX(5, np.pi, -0.64)
    c.add(gates.M(9, 3, 4, 5))
 
-We define the problem Hamiltonian of the QAOA for MaxCut, `obs`, adapted to fit the manually transpiled circuit constructed above.
+The next step is to define the problem Hamiltonian of the QAOA for MaxCut, `obs`, that is adapted to fit the manually transpiled circuit `c` constructed above.
 
 .. code-block:: python
 
    obs = 2.5 - 0.5*Z(3)*Z(9) - 0.5*Z(4)*Z(3) - 0.5*Z(4)*Z(5) - 0.5*Z(4)*Z(9) - 0.5*Z(9)*Z(5)
    obs = SymbolicHamiltonian(obs, nqubits=c.nqubits, backend=NumpyBackend())
 
-Finally, we can run ZNE using `BraketClientBackend` with verbatim mode enabled to obtain the estimated (extrapolated) result.
+Finally, with the transpiled circuit `c` and the problem Hamiltonian `obs`, we can run ZNE using `BraketClientBackend` with verbatim mode enabled to obtain the estimated (extrapolated) result.
 
 .. code-block:: python
 
