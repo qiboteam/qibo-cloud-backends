@@ -2323,7 +2323,7 @@ files = [
 [package.dependencies]
 decorator = ">=5.1.0"
 importlib-metadata = ">=4.11.4"
-qiskit-terra = ">=0.17.4"
+qiskit-terra = ">=2.0.0"
 requests = ">=2.24.0"
 retry = ">=0.9.0"
 
