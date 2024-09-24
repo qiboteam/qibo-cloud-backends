@@ -91,7 +91,11 @@ def test_list_available_backends():
         "tensorflow": False,
         "pytorch": False,
         "qulacs": False,
-        "qibo-cloud-backends": {"qibo-client": True, "qiskit-client": True},
+        "qibo-cloud-backends": {
+            "qibo-client": True,
+            "qiskit-client": True,
+            "braket-client": True,
+        },
     }
     assert list_available_backends("qibo-cloud-backends") == available_backends
 
