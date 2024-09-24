@@ -67,7 +67,6 @@ Alternatively, one can also use the LocalSimulator to execute circuit `c`. This 
    counts = AWS.execute_circuit(c, nshots=1000).frequencies()
    print(counts)
 
-
 To monitor the status of a circuit that is executed, especially on an Amazon Braket device, one can set `monitoring=True`. By default, `monitoring=False`.
 
 .. code-block:: python
@@ -163,7 +162,7 @@ In this example, we illustrate the use of Zero Noise Extrapolation (ZNE) to impr
 
 Here, we make several assumptions:
 
-1. The user is able to transpile any Qibo circuit to fit IQM Garnet's qubit topology.
+1. The user is able to transpile any Qibo circuit to IQM Garnet's native gates and to fit IQM Garnet's qubit topology.
 
 2. The optimal angles for the single QAOA layer are known.
 
@@ -250,12 +249,17 @@ The next step is to define the problem Hamiltonian of the QAOA for MaxCut, `obs`
 
 .. code-block:: python
 
+   from qibo.symbols import Z
+   from qibo.hamiltonians import SymbolicHamiltonian
+
    obs = 2.5 - 0.5*Z(3)*Z(9) - 0.5*Z(4)*Z(3) - 0.5*Z(4)*Z(5) - 0.5*Z(4)*Z(9) - 0.5*Z(9)*Z(5)
    obs = SymbolicHamiltonian(obs, nqubits=c.nqubits, backend=NumpyBackend())
 
 Finally, with the transpiled circuit `c` and the problem Hamiltonian `obs`, we can run ZNE using `BraketClientBackend` with verbatim mode enabled to obtain the estimated (extrapolated) result.
 
 .. code-block:: python
+
+   from qibo.models.error_mitigation import get_noisy_circuit, ZNE
 
    device = AwsDevice('arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet')
    AWS = BraketClientBackend(device = device, verbatim_circuit=True)
