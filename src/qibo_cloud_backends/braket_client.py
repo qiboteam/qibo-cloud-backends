@@ -44,7 +44,7 @@ class BraketClientBackend(NumpyBackend):
             raise_error(RuntimeError, "No measurement found in the provided circuit.")
         braket_circuit = to_braket(circuit_qibo, self.verbatim_circuit)
 
-        task = self.device.run(braket_circuit, shots=nshots)
+        task = self.device.run(braket_circuit, shots=nshots, **kwargs)
 
         while self.monitoring:
             status = task.state()
