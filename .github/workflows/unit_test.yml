@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [labeled]
   schedule:
-    - cron: '50 15 * * *'
+    - cron: '0 0 1 * *'
 
 env:
   IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
@@ -14,7 +14,7 @@ env:
 
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push' || github.event.schedule == '50 15 * * *'
+    if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push' || github.event.schedule == '0 0 1 * *'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
