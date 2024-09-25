@@ -9,7 +9,7 @@ on:
     types:
       - published
   schedule:
-    - cron: '50 15 * * *'
+    - cron: '0 0 1 * *'
 
 jobs:
   build:
