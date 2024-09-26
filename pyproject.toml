@@ -24,15 +24,16 @@ python = ">=3.9,<3.13"
 qibo = "^0.2.11"
 qibo_client = "^0.0.9"
 qiskit_ibm_runtime = ">=0.17"
-qiskit_ibm_provider = ">=0.8.0"
-qiskit_braket_provider = { version = "^0.3.1", optional = true }
+qiskit_braket_provider = ">=0.4.1"
+qiskit_ionq = ">=0.5.2"
+qiskit = "^1.1.0"
 amazon-braket-sdk = { version = "^1.83.0", optional = true }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 pylint = "^3.0.3"
-qiskit_braket_provider = "^0.3.1"
+qiskit_braket_provider = ">=0.4.1"
 amazon-braket-sdk = "^1.83.0"
 
 [tool.poetry.group.docs.dependencies]
