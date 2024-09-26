@@ -60,11 +60,18 @@ class MetaBackend:
             tokens = {}
         available_backends = {}
         for client, token in zip(CLIENTS, TOKENS):
-            try:
-                token = tokens.get(client, os.environ[token])
-                MetaBackend.load(client=client, token=token)
-                available = True
-            except:  # pragma: no cover
-                available = False
+            if client == "braket-client":
+                try:
+                    MetaBackend.load(client=client)
+                    available = True
+                except:
+                    available = False
+            else:
+                try:
+                    token = tokens.get(client, os.environ[token])
+                    MetaBackend.load(client=client, token=token)
+                    available = True
+                except:  # pragma: no cover
+                    available = False
             available_backends[client] = available
         return available_backends
