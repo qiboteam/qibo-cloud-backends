@@ -12,8 +12,8 @@ __version__ = im.version(__package__)
 
 QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend, BraketClientBackend]
 
-CLIENTS = ("qibo-client", "qiskit-client")
-TOKENS = ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN")
+CLIENTS = ("qibo-client", "qiskit-client", "braket-client")
+TOKENS = ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN", None)
 
 
 class MetaBackend:
