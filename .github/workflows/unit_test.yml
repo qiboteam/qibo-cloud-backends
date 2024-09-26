@@ -14,7 +14,7 @@ env:
 
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push' || github.event.schedule == '0 0 1 * *'
+    if: github.event.schedule == '0 0 1 * *' || contains(github.event.pull_request.labels.*.name, 'run-workflow') || github.event_name == 'push'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
