@@ -51,8 +51,8 @@ class MetaBackend:
 
         Args:
             tokens (dict): Mapping between the services and their tokens, e.g.
-                           {"qibo-client": "xxxxx", "qiskit-client": "xxxxx"}.
-                           By default reads the variables ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN").
+                           {"qibo-client": "xxxxx", "qiskit-client": "xxxxx", "braket-client": "xxxxx"}.
+                           By default reads the variables ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN", None).
         Returns:
             dict: the qibo-cloud available backends.
         """
@@ -60,18 +60,17 @@ class MetaBackend:
             tokens = {}
         available_backends = {}
         for client, token in zip(CLIENTS, TOKENS):
-            if client == "braket-client":
-                try:
-                    MetaBackend.load(client=client)
-                    available = True
-                except:
-                    available = False
-            else:
-                try:
-                    token = tokens.get(client, os.environ[token])
-                    MetaBackend.load(client=client, token=token)
-                    available = True
-                except:  # pragma: no cover
-                    available = False
+            kwargs = {}
+            if client != "braket-client":
+                token = tokens.get(client, os.environ.get(token))
+                if token is None:
+                    available_backends[client] = False
+                    continue
+                kwargs.update({"token": token})
+            try:
+                MetaBackend.load(client=client, **kwargs)
+                available = True
+            except:
+                available = False
             available_backends[client] = available
         return available_backends
