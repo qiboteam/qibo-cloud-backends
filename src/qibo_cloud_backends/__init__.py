@@ -39,7 +39,7 @@ class MetaBackend:
         elif client == "qiskit-client":
             return QiskitClientBackend(token, platform)
         elif client == "braket-client":
-            return BraketClientBackend()
+            return BraketClientBackend(verbosity=verbosity)
         else:
             raise_error(
                 ValueError,
