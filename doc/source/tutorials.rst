@@ -67,12 +67,12 @@ Alternatively, one can also use the LocalSimulator to execute circuit `c`. This 
    counts = AWS.execute_circuit(c, nshots=1000).frequencies()
    print(counts)
 
-To monitor the status of a circuit that is executed, especially on an Amazon Braket device, one can set `monitoring=True`. By default, `monitoring=False`.
+To monitor the status of a circuit that is executed, especially on an Amazon Braket device, one can set `verbosity=True`. By default, `verbosity=False`.
 
 .. code-block:: python
 
    device = "arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet"
-   AWS = BraketClientBackend(device = device, verbatim_circuit=False, monitoring=True)
+   AWS = BraketClientBackend(device = device, verbatim_circuit=False, verbosity=True)
 
    counts = AWS.execute_circuit(c, nshots=1000).frequencies()
    print(counts)
