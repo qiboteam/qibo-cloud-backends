@@ -23,6 +23,8 @@ packages = [{ include = "qibo_cloud_backends", from = "src" }]
 python = ">=3.9,<3.13"
 qibo = "^0.2.11"
 qibo_client = "^0.0.9"
+qiskit_ibm_runtime = ">=0.17"
+qiskit_ibm_provider = ">=0.8.0"
 amazon-braket-sdk = { version = "^1.83.0", optional = true }
 
 [tool.poetry.group.test.dependencies]
