@@ -15,9 +15,11 @@ class BraketClientBackend(NumpyBackend):
         """Backend for the remote execution of AWS circuits on the AWS backends.
 
         Args:
-            device (str): The string representing the ARN of the Braket device. Defaults to Braket's statevector LocalSimulator,
-                          LocalSimulator("default"). Other devices are Braket's density matrix simulator,
-                          LocalSimulator("braket_dm"), or any other QPUs.
+            device (str): The ARN of the Braket device (e.g., "arn:aws:braket:::device/quantum-simulator/amazon/sv1")
+                          or "braket_dm" for the density matrix simulator (`LocalSimulator("braket_dm")`).
+                          If `None`, defaults to the statevector LocalSimulator("default").
+                          For other Braket devices and their respective ARNs, refer to:
+                          https://docs.aws.amazon.com/braket/latest/developerguide/braket-devices.html.
             verbatim_circuit (bool): If `True`, to_braket will wrap the Braket circuit in a verbatim box to run it on the QPU
                                      without any transpilation. Defaults to `False`.
             verbosity (bool): If `True`, the status of the executed task will be displayed. Defaults to `False`.
@@ -27,7 +29,12 @@ class BraketClientBackend(NumpyBackend):
         self.verbatim_circuit = verbatim_circuit
         self.verbosity = verbosity
 
-        self.device = AwsDevice(device) if device else LocalSimulator()
+        if device == "braket_dm":
+            self.device = LocalSimulator("braket_dm")
+        elif device:
+            self.device = AwsDevice(device)
+        else:
+            self.device = LocalSimulator()
         self.name = "aws"
 
     def execute_circuit(self, circuit_qibo, nshots=1000, **kwargs):
