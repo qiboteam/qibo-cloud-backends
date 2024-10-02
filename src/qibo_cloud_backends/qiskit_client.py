@@ -13,7 +13,7 @@ class QiskitClientBackend(NumpyBackend):
 
     Args:
         token (str): User authentication token. By default this is read from the 'IBMQ_TOKEN' environment variable.
-        platform (str): The IBM platform. Defaults to `"ibm_osaka"`.
+        platform (str): The IBM platform. Defaults to `"ibm_kyiv"`.
     """
 
     def __init__(self, token=None, platform=None):
@@ -27,7 +27,7 @@ class QiskitClientBackend(NumpyBackend):
                     "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `IBMQ_TOKEN='your_token'`.",
                 )
         if platform is None:
-            platform = "ibm_osaka"
+            platform = "ibm_kyiv"
         self.name = "qiskit-client"
         provider = IBMProvider(token)
         self.backend = provider.get_backend(platform)

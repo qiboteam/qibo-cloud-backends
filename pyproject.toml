@@ -22,14 +22,22 @@ packages = [{ include = "qibo_cloud_backends", from = "src" }]
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
 qibo = "^0.2.11"
-qibo_client = "^0.0.9"
-qiskit_ibm_runtime = ">=0.17"
-qiskit_ibm_provider = ">=0.8.0"
+qibo_client = "^0.0.10"
+qiskit_ibm_runtime = { version = "^0.17", optional = true }
+qiskit_ibm_provider = { version = "^0.11", optional = true }
 
-[tool.poetry.group.test.dependencies]
+[tool.poetry.group.tests]
+optional = true
+
+[tool.poetry.group.tests.dependencies]
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 pylint = "^3.0.3"
+qiskit_ibm_runtime = "^0.17"
+qiskit_ibm_provider = "^0.11"
+
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.2.6"
@@ -38,6 +46,8 @@ sphinx-copybutton = "^0.5.2"
 nbsphinx = "^0.9.3"
 furo = "^2023.9.10"
 
+[tool.poetry.group.dev]
+optional = true
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^7"
