@@ -77,6 +77,8 @@ To monitor the status of a circuit that is executed, especially on an Amazon Bra
    counts = AWS.execute_circuit(c, nshots=1000).frequencies()
    print(counts)
 
+One can also use the density matrix local simulator by specifying `device = "local_simulator:braket_dm"`.
+
 
 .. _execute_in_verbatim_mode:
 
