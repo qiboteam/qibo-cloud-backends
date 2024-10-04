@@ -15,8 +15,12 @@ class BraketClientBackend(NumpyBackend):
         """Backend for the remote execution of AWS circuits on the AWS backends.
 
         Args:
-            device (str): The ARN of the Braket device (e.g., "arn:aws:braket:::device/quantum-simulator/amazon/sv1")
-                          or "braket_dm" for the density matrix simulator (`LocalSimulator("braket_dm")`).
+            device (str): To specify a Braket device, input the ARN of the Braket device
+                          (e.g., "arn:aws:braket:::device/quantum-simulator/amazon/sv1").
+                          To specify a LocalSimulator, input "local_simulator:device_string", replacing "device_string" with
+                          one of these: ['braket_ahs', 'braket_dm', 'braket_sv', 'default'].
+                          (e.g., "local_simulator:braket_dm").
+                          Note that LocalSimulator("braket_ahs") is not support at the moment.
                           If `None`, defaults to the statevector LocalSimulator("default").
                           For other Braket devices and their respective ARNs, refer to:
                           https://docs.aws.amazon.com/braket/latest/developerguide/braket-devices.html.
@@ -29,12 +33,11 @@ class BraketClientBackend(NumpyBackend):
         self.verbatim_circuit = verbatim_circuit
         self.verbosity = verbosity
 
-        if device == "braket_dm":
-            self.device = LocalSimulator("braket_dm")
-        elif device:
-            self.device = AwsDevice(device)
-        else:
-            self.device = LocalSimulator()
+        self.device = (
+            AwsDevice(device)
+            if device.split(":")[0] != "local_simulator"
+            else LocalSimulator(device.split(":")[1])
+        )
         self.name = "aws"
 
     def execute_circuit(self, circuit_qibo, nshots=1000, **kwargs):
