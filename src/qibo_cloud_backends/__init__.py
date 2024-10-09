@@ -27,7 +27,7 @@ class MetaBackend:
         Args:
             client (str): Name of the cloud client to load, one in ("qibo-client", "qiskit-client").
             token (str): User token for the remote connection.
-            platform (str): Name of the platform to connect to on the provider's servers, e.g. `ibm_osaka`.
+            platform (str): Name of the platform to connect to on the provider's servers.
             verbosity (bool): Enable verbose mode for the qibo-client. Default is False.
         Returns:
             qibo.backends.abstract.Backend: The loaded backend.

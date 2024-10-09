@@ -16,7 +16,7 @@ from qibo_cloud_backends import MetaBackend, QiboClientBackend, QiskitClientBack
 
 NP_BACKEND = NumpyBackend()
 QISKIT_TK = os.environ.get("IBMQ_TOKEN")
-QIBO_TK = os.environ.get("QIBO_CLIENT_TII_TOKEN")
+QIBO_TK = os.environ.get("QIBO_CLIENT_TOKEN")
 
 
 def qibo_circuit(nqubits=3):
@@ -26,7 +26,7 @@ def qibo_circuit(nqubits=3):
 
 
 def qiskit_circuit(nqubits=3, measurement=True):
-    # ibm_osaka's native gates are: ECR, I, RZ, SX, X
+    # ibm_kyiv's native gates are: ECR, I, RZ, SX, X
     c = Circuit(nqubits)
     c.add(gates.X(0))
     # c.add(gates.ECR(0,1)) # ECR not supported by (our) QASM apparently
@@ -98,7 +98,7 @@ def test_list_available_backends():
 @pytest.mark.parametrize("token", [None, QISKIT_TK])
 def test_qiskit_client_backend(token):
     c = qiskit_circuit()
-    client = QiskitClientBackend(token=token, platform="ibm_osaka")
+    client = QiskitClientBackend(token=token, platform="ibm_kyiv")
     local_res = NP_BACKEND.execute_circuit(c)
     remote_res = client.execute_circuit(c)
     NP_BACKEND.assert_allclose(
@@ -110,7 +110,7 @@ def test_qiskit_client_backend(token):
 def test_qiskit_client_backend_initial_state(measurement):
     nqubits = 3
     c = qiskit_circuit(nqubits, measurement=measurement)
-    client = QiskitClientBackend(token=QISKIT_TK, platform="ibm_osaka")
+    client = QiskitClientBackend(token=QISKIT_TK, platform="ibm_kyiv")
     if measurement:
         state = np.zeros(2**nqubits, dtype=complex)
         with pytest.raises(NotImplementedError):

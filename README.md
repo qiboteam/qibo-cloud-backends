@@ -43,10 +43,10 @@ Then, to simulate the circuit on the `TII` cluster through the `sim` platform:
    print(result.frequencies())
 ```
 
-or, in order to run on one of the chips hosted in `ibm-q`, e.g. `ibm_osaka`:
+or, in order to run on one of the chips hosted in `ibm-q`, e.g. `ibm_kyiv`:
 
 ```python
-   qibo.set_backend("qibo-cloud-backends", client="qiskit-client", token="your_token", platform="ibm_osaka")
+   qibo.set_backend("qibo-cloud-backends", client="qiskit-client", token="your_token", platform="ibm_kyiv")
    result = circuit()
    print(result.frequencies())
 ```
