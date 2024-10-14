@@ -1922,13 +1922,13 @@ torch = ["torch (>=2.1.1,<2.4)"]
 
 [[package]]
 name = "qibo-client"
-version = "0.0.10"
+version = "0.0.11"
 description = "Qibo client interface."
 optional = false
 python-versions = "<3.13,>=3.9"
 files = [
-    {file = "qibo_client-0.0.10-py3-none-any.whl", hash = "sha256:804b3d5a240cb628a4e3d67e55e083949e737c9eadd3650158fc276c40d24021"},
-    {file = "qibo_client-0.0.10.tar.gz", hash = "sha256:19516642daa3887a87fa44b77339720b10d677e576e465384f57a3876b6a8c69"},
+    {file = "qibo_client-0.0.11-py3-none-any.whl", hash = "sha256:a24aa22f1a99cdf99cf89ba8b0acef9b3db6c12a467d4f9375445f5b8e28158e"},
+    {file = "qibo_client-0.0.11.tar.gz", hash = "sha256:ebeccfd6f32ff84b24d00b2b59a23d5212c1470ef63b6ed3a506467a907075b9"},
 ]
 
 [package.dependencies]
@@ -3014,4 +3014,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "22d059634ecc2d66ce14b5b448343c6531029ca8c03ca71fc5f20038d5dbebb3"
+content-hash = "4e0306b4f91ae494056aa58d8d7e2642a0a55e4e37da2dd56bf2a3e3842f8dfa"

@@ -22,7 +22,7 @@ packages = [{ include = "qibo_cloud_backends", from = "src" }]
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
 qibo = "^0.2.12"
-qibo_client = "^0.0.10"
+qibo_client = "^0.0.11"
 qiskit_ibm_runtime = { version = "^0.17", optional = true }
 qiskit_ibm_provider = { version = "^0.11", optional = true }
 
@@ -45,6 +45,8 @@ recommonmark = "^0.7.1"
 sphinx-copybutton = "^0.5.2"
 nbsphinx = "^0.9.3"
 furo = "^2023.9.10"
+qiskit_ibm_runtime = "^0.17"
+qiskit_ibm_provider = "^0.11"
 
 [tool.poetry.group.dev]
 optional = true
