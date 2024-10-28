@@ -34,7 +34,6 @@ class BraketClientBackend(NumpyBackend):
         self.verbosity = verbosity
 
         if device is None:
-            print("Huat")
             self.device = LocalSimulator("default")
         else:
             self.device = (
