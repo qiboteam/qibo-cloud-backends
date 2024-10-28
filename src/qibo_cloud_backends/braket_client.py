@@ -33,11 +33,15 @@ class BraketClientBackend(NumpyBackend):
         self.verbatim_circuit = verbatim_circuit
         self.verbosity = verbosity
 
-        self.device = (
-            AwsDevice(device)
-            if device.split(":")[0] != "local_simulator"
-            else LocalSimulator(device.split(":")[1])
-        )
+        if device is None:
+            print("Huat")
+            self.device = LocalSimulator("default")
+        else:
+            self.device = (
+                AwsDevice(device)
+                if device.split(":")[0] != "local_simulator"
+                else LocalSimulator(device.split(":")[1])
+            )
         self.name = "aws"
 
     def execute_circuit(self, circuit_qibo, nshots=1000, **kwargs):
