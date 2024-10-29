@@ -11,7 +11,9 @@ from qibo_cloud_backends.braket_translation import to_braket
 
 
 class BraketClientBackend(NumpyBackend):
-    def __init__(self, device=None, verbatim_circuit=False, verbosity=False):
+    def __init__(
+        self, device=None, verbatim_circuit=False, verbosity=False, token: str = None
+    ):
         """Backend for the remote execution of AWS circuits on the AWS backends.
 
         Args:
@@ -27,12 +29,17 @@ class BraketClientBackend(NumpyBackend):
             verbatim_circuit (bool): If `True`, to_braket will wrap the Braket circuit in a verbatim box to run it on the QPU
                                      without any transpilation. Defaults to `False`.
             verbosity (bool): If `True`, the status of the executed task will be displayed. Defaults to `False`.
+            token (str): This parameter is not required for executing circuits on Amazon Braket devices.
+                         It is included for potential future compatibility but should be left as None.
         """
+
         super().__init__()
 
         self.verbatim_circuit = verbatim_circuit
         self.verbosity = verbosity
 
+        if token:
+            pass
         if device is None:
             self.device = LocalSimulator("default")
         else:
