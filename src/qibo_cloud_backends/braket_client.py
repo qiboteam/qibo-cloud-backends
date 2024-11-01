@@ -38,8 +38,6 @@ class BraketClientBackend(NumpyBackend):
         self.verbatim_circuit = verbatim_circuit
         self.verbosity = verbosity
 
-        if token:
-            pass
         if device is None:
             self.device = LocalSimulator("default")
         else:
