@@ -24,7 +24,7 @@ class QiskitClientBackend(NumpyBackend):
             except KeyError:  # pragma: no cover
                 raise_error(
                     RuntimeError,
-                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `IBMQ_TOKEN='your_token'`.",
+                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment variable `IBMQ_TOKEN='your_token'`.",
                 )
         if platform is None:
             platform = "ibm_kyiv"
