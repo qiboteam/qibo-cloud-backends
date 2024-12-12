@@ -44,7 +44,7 @@
                 poetry = {
                   enable = true;
                   install.enable = true;
-                  install.groups = ["dev" "test"];
+                  install.groups = ["dev" "tests"];
                   install.allExtras = true;
                 };
               };
