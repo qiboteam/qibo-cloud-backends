@@ -4,11 +4,7 @@ import sys
 import numpy as np
 import pytest
 from qibo import Circuit, gates
-from qibo.backends import (
-    NumpyBackend,
-    list_available_backends,
-    set_backend,
-)
+from qibo.backends import NumpyBackend, list_available_backends, set_backend
 from qibo.quantum_info import random_clifford
 
 from qibo_cloud_backends import (
