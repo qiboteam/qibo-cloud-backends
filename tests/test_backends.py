@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 from qibo import Circuit, gates
 from qibo.backends import (
-    GlobalBackend,
     NumpyBackend,
     list_available_backends,
     set_backend,
