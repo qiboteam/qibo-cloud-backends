@@ -29,7 +29,7 @@ class QiboClientBackend(NumpyBackend):
             except KeyError:  # pragma: no cover
                 raise_error(
                     RuntimeError,
-                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment vairable `QIBO_CLIENT_TOKEN='your_token'`.",
+                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment variable `QIBO_CLIENT_TOKEN='your_token'`.",
                 )
         if project is None:
             project = "personal"
