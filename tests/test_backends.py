@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 from qibo import Circuit, gates
 from qibo.backends import (
-    GlobalBackend,
     NumpyBackend,
+    get_backend,
     list_available_backends,
     set_backend,
 )
@@ -75,9 +75,9 @@ def test_set_backend(backend, token):
     else:
         set_backend("qibo-cloud-backends", client=backend, token=token)
         assert isinstance(
-            GlobalBackend(), MetaBackend.load(backend, token=token).__class__
+            get_backend(), MetaBackend.load(backend, token=token).__class__
         )
-        assert GlobalBackend().name == backend
+        assert get_backend().name == backend
 
 
 def test_list_available_backends():
