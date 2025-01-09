@@ -35,7 +35,7 @@ class QiboClientBackend(NumpyBackend):
             project = "personal"
         self.project = project
         if platform is None:
-            platform = "sim"
+            platform = "k2"
         self.platform = platform
         self.name = "qibo-client"
         self.verbosity = verbosity

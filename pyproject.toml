@@ -23,9 +23,9 @@ packages = [{ include = "qibo_cloud_backends", from = "src" }]
 python = ">=3.9,<3.13"
 qibo = "^0.2.14"
 qibo_client = "^0.0.15"
-qiskit_ibm_runtime = { version = "^0.17", optional = true }
+qiskit_ibm_runtime = { version = "^0.34.0", optional = true }
 qiskit_ibm_provider = { version = "^0.11", optional = true }
-#amazon-braket-sdk = { version = "^1.83.0", optional = true }
+#amazon-braket-sdk = { version = "^1.88.3", optional = true }
 
 [tool.poetry.group.tests]
 optional = true
@@ -34,9 +34,9 @@ optional = true
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 pylint = "^3.0.3"
-qiskit_ibm_runtime = "^0.17"
+qiskit_ibm_runtime = "^0.34.0"
 qiskit_ibm_provider = "^0.11"
-#amazon-braket-sdk = "^1.83.0"
+#amazon-braket-sdk = "^1.88.3"
 
 [tool.poetry.group.docs]
 optional = true
@@ -47,8 +47,9 @@ recommonmark = "^0.7.1"
 sphinx-copybutton = "^0.5.2"
 nbsphinx = "^0.9.3"
 furo = "^2023.9.10"
-qiskit_ibm_runtime = "^0.17"
+qiskit_ibm_runtime = "^0.34.0"
 qiskit_ibm_provider = "^0.11"
+#amazon-braket-sdk = "^1.88.3"
 
 [tool.poetry.group.dev]
 optional = true
@@ -57,8 +58,8 @@ optional = true
 ipython = "^7"
 pdbpp = "^0.10.3"
 
-[tool.poetry.extras]
-aws = ["amazon-braket-sdk"]
+#[tool.poetry.extras]
+#aws = ["amazon-braket-sdk"]
 
 [tool.poe.tasks]
 test = "pytest"
