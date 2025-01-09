@@ -32,9 +32,7 @@ class QiboClientBackend(NumpyBackend):
                     "No token provided. Please explicitely pass the token `token='your_token'` or set the environment variable `QIBO_CLIENT_TOKEN='your_token'`.",
                 )
         self.project = project if project is not None else "personal"
-        if platform is None:
-            platform = "k2"
-        self.platform = platform
+        self.platform = platform if platform is not None else "k2"
         self.name = "qibo-client"
         self.verbosity = verbosity
         self.client = qibo_client.Client(token)
