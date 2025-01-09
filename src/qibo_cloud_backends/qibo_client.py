@@ -31,9 +31,7 @@ class QiboClientBackend(NumpyBackend):
                     RuntimeError,
                     "No token provided. Please explicitely pass the token `token='your_token'` or set the environment variable `QIBO_CLIENT_TOKEN='your_token'`.",
                 )
-        if project is None:
-            project = "personal"
-        self.project = project
+        self.project = project if project is not None else "personal"
         if platform is None:
             platform = "k2"
         self.platform = platform
