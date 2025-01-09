@@ -2434,21 +2434,25 @@ torch = ["torch (>=2.1.1,<2.4)"]
 
 [[package]]
 name = "qibo-client"
-version = "0.0.15"
+version = "0.0.16"
 description = "Qibo client interface."
 optional = false
-python-versions = "<3.13,>=3.9"
+python-versions = ">=3.9,<3.13"
 groups = ["main"]
-files = [
-    {file = "qibo_client-0.0.15-py3-none-any.whl", hash = "sha256:092eb66abbcb535569338ce0746ff103d5d6e51099cb427a8a5508439bf62125"},
-    {file = "qibo_client-0.0.15.tar.gz", hash = "sha256:a5a2003aed6d71192be47e40daeac763f4f8fe15e5d0d61f9648e0b1c73053f1"},
-]
+files = []
+develop = false
 
 [package.dependencies]
-packaging = ">=24.1,<25.0"
-qibo = ">=0.2.4,<0.3.0"
-requests = ">=2.31.0,<3.0.0"
-tabulate = ">=0.9.0,<0.10.0"
+packaging = "^24.1"
+qibo = "^0.2.4"
+requests = "^2.31.0"
+tabulate = "^0.9.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/qiboteam/qibo-client/"
+reference = "feature/refactor-webapp-endpoints"
+resolved_reference = "084f5378086f3201979a8895e1f85ace0e4a1a1b"
 
 [[package]]
 name = "qiskit"
@@ -3634,7 +3638,10 @@ enabler = ["pytest-enabler (>=2.2)"]
 test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-itertools", "pytest (>=6,!=8.1.*)", "pytest-ignore-flaky"]
 type = ["pytest-mypy"]
 
+[extras]
+aws = ["amazon-braket-sdk"]
+
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "84f252538eb1a84c87727e1f90ec8d3038d6cbc1d1f70fd3778e72507d1d4977"
+content-hash = "0b2faa9441b66e304e380e02a014aab2ed70d7cc445fd13e5580011b29551e92"
