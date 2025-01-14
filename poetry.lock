@@ -2434,7 +2434,7 @@ torch = ["torch (>=2.1.1,<2.4)"]
 
 [[package]]
 name = "qibo-client"
-version = "0.0.16"
+version = "0.0.17"
 description = "Qibo client interface."
 optional = false
 python-versions = ">=3.9,<3.13"
@@ -2451,8 +2451,8 @@ tabulate = "^0.9.0"
 [package.source]
 type = "git"
 url = "https://github.com/qiboteam/qibo-client/"
-reference = "feature/refactor-webapp-endpoints"
-resolved_reference = "8b8d5f20ca8ef4d3ad9088f6f4f2f0a02d53bfc5"
+reference = "HEAD"
+resolved_reference = "bbf8cc8139c1f1473db7642f5d903091fa19ad4c"
 
 [[package]]
 name = "qiskit"
@@ -3644,4 +3644,4 @@ aws = ["amazon-braket-sdk"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "5fe3d90ccf8b04c63c6a2cfe1f113423c8db4031e997f4a5d7b616106224b036"
+content-hash = "73d31a2586c5698806bbe15174088c120ea2df7ccc25403db0b789bef88c3a07"

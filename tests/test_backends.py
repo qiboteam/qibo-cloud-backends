@@ -48,7 +48,7 @@ def test_qibo_client_backend(token):
     c = qibo_circuit(nqubits=3)
     client = QiboClientBackend(token=token)
     local_res = NP_BACKEND.execute_circuit(c)
-    remote_res = client.execute_circuit(c)
+    remote_res = client.execute_circuit(c, nshots=100)
     NP_BACKEND.assert_allclose(
         local_res.probabilities(qubits=[0, 2]),
         remote_res.probabilities(qubits=[0, 2]),
@@ -88,8 +88,6 @@ def test_set_backend(backend, token):
 def test_list_available_backends():
     available_backends = {
         "numpy": True,
-        "tensorflow": False,
-        "pytorch": False,
         "qulacs": False,
         "qibo-cloud-backends": {
             "qibo-client": True,
