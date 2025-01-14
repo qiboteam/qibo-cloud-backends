@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 from qibo import Circuit, gates
 from qibo.backends import (
-    GlobalBackend,
     NumpyBackend,
+    get_backend,
     list_available_backends,
     set_backend,
 )
@@ -48,7 +48,7 @@ def test_qibo_client_backend(token):
     c = qibo_circuit(nqubits=3)
     client = QiboClientBackend(token=token)
     local_res = NP_BACKEND.execute_circuit(c)
-    remote_res = client.execute_circuit(c)
+    remote_res = client.execute_circuit(c, nshots=100)
     NP_BACKEND.assert_allclose(
         local_res.probabilities(qubits=[0, 2]),
         remote_res.probabilities(qubits=[0, 2]),
@@ -80,16 +80,14 @@ def test_set_backend(backend, token):
     else:
         set_backend("qibo-cloud-backends", client=backend, token=token)
         assert isinstance(
-            GlobalBackend(), MetaBackend.load(backend, token=token).__class__
+            get_backend(), MetaBackend.load(backend, token=token).__class__
         )
-        assert GlobalBackend().name == backend
+        assert get_backend().name == backend
 
 
 def test_list_available_backends():
     available_backends = {
         "numpy": True,
-        "tensorflow": False,
-        "pytorch": False,
         "qulacs": False,
         "qibo-cloud-backends": {
             "qibo-client": True,
