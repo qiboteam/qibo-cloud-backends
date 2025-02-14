@@ -5,6 +5,7 @@ API Reference
 
 Here are reported the Qibo backends that support the execution of Quantum Circuits through different cloud service providers.
 
+
 Qibo Cloud Backend
 ^^^^^^^^^^^^^^^^^^
 
@@ -13,6 +14,7 @@ This backend supports qibo-based providers.
 .. autoclass:: qibo_cloud_backends.qibo_client.QiboClientBackend
     :members:
     :member-order: bysource
+
 
 Qiskit Cloud Backend
 ^^^^^^^^^^^^^^^^^^^^
