@@ -63,6 +63,7 @@ pdbpp = "^0.10.3"
 
 [tool.poetry.extras]
 aws = ["amazon-braket-sdk"]
+ionq = ["qiskit_ionq"]
 
 [tool.poe.tasks]
 test = "pytest"
