@@ -44,3 +44,19 @@ This backend provides support for AWS Braket devices, ranging from the LocalSimu
 .. autoclass:: qibo_cloud_backends.braket_client.BraketClientBackend
     :members:
     :member-order: bysource
+
+
+IonQ Cloud Backend
+^^^^^^^^^^^^^^^^^^
+
+This backend supports IonQ as provider, namely the ``qibo`` circuits are loaded as QASM circuits and the job is sent to the IonQ Cloud servers.
+
+.. note::
+   The :meth:`qibo_cloud_backends.ionq_client.IonQClientBackend.execute_circuit` does not take care of any transpilation and expects the passed circuit to be transpiled already.
+
+.. note::
+   Circuits with no measurements are not supported yet. Remember to add measurements to your circuit!
+
+.. autoclass:: qibo_cloud_backends.ionq_client.IonQClientBackend
+    :members:
+    :member-order: bysource
