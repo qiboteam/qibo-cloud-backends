@@ -2407,14 +2407,14 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "qibo"
-version = "0.2.15"
+version = "0.2.16"
 description = "A framework for quantum computing with hardware acceleration."
 optional = false
 python-versions = "<3.13,>=3.9"
 groups = ["main"]
 files = [
-    {file = "qibo-0.2.15-py3-none-any.whl", hash = "sha256:51625e7b1ac7f21e335b50931230437cf866fae7284bdc6b3433e80925d0f091"},
-    {file = "qibo-0.2.15.tar.gz", hash = "sha256:e002b9f785e66f1eed3f22fecc98b0d79d60d68842bbee6098d6754da981eac1"},
+    {file = "qibo-0.2.16-py3-none-any.whl", hash = "sha256:6a854e144dc0384fc6ee472ec0467c90f23661701a96821ad55fe1e33e386603"},
+    {file = "qibo-0.2.16.tar.gz", hash = "sha256:3063fae1c92314c93b179f220e09406e8efc59876f6b6d5a99a6b583c6d428fd"},
 ]
 
 [package.dependencies]
@@ -2434,19 +2434,19 @@ torch = ["torch (>=2.1.1,<2.4)"]
 
 [[package]]
 name = "qibo-client"
-version = "0.0.16"
+version = "0.0.17"
 description = "Qibo client interface."
 optional = false
 python-versions = "<3.13,>=3.9"
 groups = ["main"]
 files = [
-    {file = "qibo_client-0.0.16-py3-none-any.whl", hash = "sha256:2eed6688aefb10d83c4533602fefc59fcca04c14e7d2e6fd0ceea9799e7883fe"},
-    {file = "qibo_client-0.0.16.tar.gz", hash = "sha256:0a8cb6d002300fab4ebf7026f3b025f42c15b1cb2f289fc569b16b2c3082b5e3"},
+    {file = "qibo_client-0.0.17-py3-none-any.whl", hash = "sha256:bc0e55e9962e7eeab91de33f7c31e01bb46e19c8b664a353688e34b6e465d7c4"},
+    {file = "qibo_client-0.0.17.tar.gz", hash = "sha256:0e7103541c5b70b6cfa5ef9097d9e8cb14eb8f96e9d42026b84e63503cd22be9"},
 ]
 
 [package.dependencies]
 packaging = ">=24.1,<25.0"
-qibo = ">=0.2.4,<0.3.0"
+qibo = ">=0.2.16,<0.3.0"
 requests = ">=2.31.0,<3.0.0"
 tabulate = ">=0.9.0,<0.10.0"
 
@@ -3641,4 +3641,4 @@ aws = ["amazon-braket-sdk"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "256da40277b3f28000942b53f5c51837e1a47f715f8fbb7da0bdc1660c713562"
+content-hash = "e6d7ca5d07c28698c7ba2b3445c8fafeac617b51f4c58ffc6fae31c1f419e50a"
