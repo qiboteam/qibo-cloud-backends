@@ -2079,6 +2079,20 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-dotenv"
+version = "1.0.1"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"},
+    {file = "python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "pywin32"
 version = "308"
 description = "Python for Window Extensions"
@@ -2420,6 +2434,27 @@ common = ["black (>=24.1,<25.0)", "coverage (>=6.3)", "ddt (>=1.2.0,!=1.4.0,!=1.
 dev = ["qiskit-ibm-runtime[common]", "qiskit-ibm-runtime[documentation]"]
 documentation = ["Sphinx (>=6)", "jupyter-sphinx", "nbsphinx", "packaging", "sphinx-autodoc-typehints (<=1.19.2)", "sphinx-automodapi", "sphinxcontrib-katex (==0.9.9)"]
 visualization = ["plotly (>=5.23.0)"]
+
+[[package]]
+name = "qiskit-ionq"
+version = "0.5.12"
+description = "Qiskit provider for IonQ backends"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "qiskit_ionq-0.5.12-py3-none-any.whl", hash = "sha256:a56d831d9fcd890ce32c75ae27054e1701f79eb42d52eed7da2480adfa8697e3"},
+    {file = "qiskit_ionq-0.5.12.tar.gz", hash = "sha256:10648f302331575a93d45ce09cfb2653de2cee60f40318183f7da5b17dc5877e"},
+]
+
+[package.dependencies]
+decorator = ">=5.1.0"
+importlib-metadata = ">=4.11.4"
+python-dotenv = ">=1.0.1"
+qiskit = "*"
+requests = ">=2.24.0"
+
+[package.extras]
+test = ["pytest", "pytest-cov (==2.10.1)", "qiskit (>=1.0.0)", "requests-mock (>=1.8.0)"]
 
 [[package]]
 name = "recommonmark"
@@ -3468,9 +3503,9 @@ type = ["pytest-mypy"]
 
 [extras]
 aws = ["amazon-braket-sdk"]
-ionq = []
+ionq = ["qiskit_ionq"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "ed776dd079c2a6d2b2352731539e29965b7765171ed44f6fe2f55fe5da27abeb"
+content-hash = "5812cedff4fc4325927765b09c0e5a15d64ac49398bb3c9a23959358a5391f0c"
