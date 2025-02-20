@@ -13,7 +13,7 @@ class IonQClientBackend(NumpyBackend):
 
     Args:
         token (str, optional): User authentication token. By default this is read from the 'IONQ_TOKEN' environment variable.
-        platform (str, optional ): The IBM platform. Defaults to `"ionq_simulator"`.
+        platform (str, optional ): The IonQ platform. Defaults to `"ionq_simulator"`.
     """
 
     def __init__(self, token=None, platform=None, **kwargs):
