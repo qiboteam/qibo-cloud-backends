@@ -23,6 +23,7 @@ from qibo_cloud_backends import (
 NP_BACKEND = NumpyBackend()
 QISKIT_TK = os.environ.get("IBMQ_TOKEN")
 QIBO_TK = os.environ.get("QIBO_CLIENT_TOKEN")
+IONQ_TK = os.environ.get("IONQ_TOKEN")
 
 
 def qibo_circuit(nqubits=3):
@@ -141,3 +142,24 @@ def test_braket_client_backend(verbatim):
         remote_res.probabilities(qubits=[0, 2]),
         atol=1e-1,
     )
+
+
+@pytest.mark.parametrize("seed", [10])
+@pytest.mark.parametrize("nqubits", [5])
+def test_ionq_backend(nqubits, seed):
+    nshots = int(1e4)
+    circuit = random_clifford(nqubits, seed=seed)
+    circuit.add(gates.M(qubit) for qubit in range(nqubits))
+
+    target = NP_BACKEND.execute_circuit(circuit, nshots=nshots)
+    target_probs = target.probabilities()
+
+    backend = IonQClientBackend()
+    backend.set_seed(seed)
+
+    result = backend.execute_circuit(circuit, nshots=nshots)
+    probs = result.probabilities()
+
+    print(sum(probs), sum(target_probs))
+
+    NP_BACKEND.assert_allclose(probs, target_probs, rtol=1e-1, atol=1e-1)
