@@ -11,6 +11,7 @@ on:
 env:
   IBMQ_TOKEN: ${{ secrets.IBMQ_TOKEN }}
   QIBO_CLIENT_TOKEN: ${{ secrets.QIBO_CLIENT_TOKEN }}
+  IONQ_TOKEN: ${{ secrets.IONQ_TOKEN }}
 
 jobs:
   build:
