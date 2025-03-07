@@ -96,6 +96,7 @@ def test_list_available_backends():
             "qibo-client": True,
             "qiskit-client": True,
             "braket-client": True,
+            "ionq-client": True,
         },
     }
     assert list_available_backends("qibo-cloud-backends") == available_backends
