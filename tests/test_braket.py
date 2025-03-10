@@ -3,9 +3,7 @@ import pytest
 from braket.circuits import Circuit as BraketCircuit
 from qibo import Circuit, gates
 from qibo.backends import NumpyBackend
-from qibo.quantum_info import random_clifford
 
-from qibo_cloud_backends.braket_client import BraketClientBackend
 from qibo_cloud_backends.braket_translation import to_braket
 
 NP_BACKEND = NumpyBackend()

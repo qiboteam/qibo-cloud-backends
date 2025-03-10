@@ -14,6 +14,7 @@ from qibo.quantum_info import random_clifford
 
 from qibo_cloud_backends import (
     BraketClientBackend,
+    IonQClientBackend,
     MetaBackend,
     QiboClientBackend,
     QiskitClientBackend,
@@ -22,33 +23,35 @@ from qibo_cloud_backends import (
 NP_BACKEND = NumpyBackend()
 QISKIT_TK = os.environ.get("IBMQ_TOKEN")
 QIBO_TK = os.environ.get("QIBO_CLIENT_TOKEN")
+IONQ_TK = os.environ.get("IONQ_TOKEN")
 
 
 def qibo_circuit(nqubits=3):
-    c = random_clifford(nqubits, backend=NP_BACKEND)
-    c.add(gates.M(0, 2))
-    return c
+    circuit = random_clifford(nqubits, backend=NP_BACKEND)
+    circuit.add(gates.M(0, 2))
+    return circuit
 
 
 def qiskit_circuit(nqubits=3, measurement=True):
     # ibm_kyiv's native gates are: ECR, I, RZ, SX, X
-    c = Circuit(nqubits)
-    c.add(gates.X(0))
-    # c.add(gates.ECR(0,1)) # ECR not supported by (our) QASM apparently
-    # c.add(gates.ECR(1,2))
-    c.add(gates.SX(1))
-    c.add(gates.RZ(2, theta=np.pi / 2))
+    circuit = Circuit(nqubits)
+    circuit.add(gates.X(0))
+    # circuit.add(gates.ECR(0,1)) # ECR not supported by (our) QASM apparently
+    # circuit.add(gates.ECR(1,2))
+    circuit.add(gates.SX(1))
+    circuit.add(gates.RZ(2, theta=np.pi / 2))
     if measurement:
-        c.add(gates.M(0, 2))
-    return c
+        circuit.add(gates.M(0, 2))
+
+    return circuit
 
 
 @pytest.mark.parametrize("token", [None, QIBO_TK])
 def test_qibo_client_backend(token):
-    c = qibo_circuit(nqubits=3)
+    circuit = qibo_circuit(nqubits=3)
     client = QiboClientBackend(token=token)
-    local_res = NP_BACKEND.execute_circuit(c)
-    remote_res = client.execute_circuit(c, nshots=100)
+    local_res = NP_BACKEND.execute_circuit(circuit)
+    remote_res = client.execute_circuit(circuit, nshots=100)
     NP_BACKEND.assert_allclose(
         local_res.probabilities(qubits=[0, 2]),
         remote_res.probabilities(qubits=[0, 2]),
@@ -58,11 +61,11 @@ def test_qibo_client_backend(token):
 
 def test_qibo_client_backend_initial_state():
     nqubits = 3
-    c = qibo_circuit(nqubits)
+    circuit = qibo_circuit(nqubits)
     client = QiboClientBackend(token=QIBO_TK)
     with pytest.raises(NotImplementedError):
         state = np.zeros(2**nqubits, dtype=complex)
-        client.execute_circuit(c, state)
+        client.execute_circuit(circuit, state)
 
 
 @pytest.mark.parametrize(
@@ -93,6 +96,7 @@ def test_list_available_backends():
             "qibo-client": True,
             "qiskit-client": True,
             "braket-client": True,
+            "ionq-client": True,
         },
     }
     assert list_available_backends("qibo-cloud-backends") == available_backends
@@ -104,10 +108,10 @@ def test_list_available_backends():
 )
 @pytest.mark.parametrize("token", [None, QISKIT_TK])
 def test_qiskit_client_backend(token):
-    c = qiskit_circuit()
+    circuit = qiskit_circuit()
     client = QiskitClientBackend(token=token, platform="ibm_kyiv")
-    local_res = NP_BACKEND.execute_circuit(c)
-    remote_res = client.execute_circuit(c)
+    local_res = NP_BACKEND.execute_circuit(circuit)
+    remote_res = client.execute_circuit(circuit)
     NP_BACKEND.assert_allclose(
         local_res.probabilities(qubits=[0, 2]), remote_res.probabilities(), atol=0.2
     )
@@ -116,26 +120,45 @@ def test_qiskit_client_backend(token):
 @pytest.mark.parametrize("measurement", [True, False])
 def test_qiskit_client_backend_initial_state(measurement):
     nqubits = 3
-    c = qiskit_circuit(nqubits, measurement=measurement)
+    circuit = qiskit_circuit(nqubits, measurement=measurement)
     client = QiskitClientBackend(token=QISKIT_TK, platform="ibm_kyiv")
     if measurement:
         state = np.zeros(2**nqubits, dtype=complex)
         with pytest.raises(NotImplementedError):
-            client.execute_circuit(c, state)
+            client.execute_circuit(circuit, state)
     else:
         with pytest.raises(RuntimeError):
-            client.execute_circuit(c)
+            client.execute_circuit(circuit)
 
 
 @pytest.mark.parametrize("verbatim", [True, False])
 def test_braket_client_backend(verbatim):
-    c = random_clifford(3, backend=NP_BACKEND)
-    c.add(gates.M(0, 2))
+    circuit = random_clifford(3, backend=NP_BACKEND)
+    circuit.add(gates.M(0, 2))
     client = BraketClientBackend(verbatim_circuit=verbatim)
-    local_res = NP_BACKEND.execute_circuit(c)
-    remote_res = client.execute_circuit(c)
+    local_res = NP_BACKEND.execute_circuit(circuit)
+    remote_res = client.execute_circuit(circuit)
     NP_BACKEND.assert_allclose(
         local_res.probabilities(qubits=[0, 2]),
         remote_res.probabilities(qubits=[0, 2]),
         atol=1e-1,
     )
+
+
+@pytest.mark.parametrize("seed", [10])
+@pytest.mark.parametrize("nqubits", [5])
+def test_ionq_backend(nqubits, seed):
+    nshots = int(1e4)
+    circuit = random_clifford(nqubits, seed=seed)
+    circuit.add(gates.M(qubit) for qubit in range(nqubits))
+
+    target = NP_BACKEND.execute_circuit(circuit, nshots=nshots)
+    target_probs = target.probabilities()
+
+    backend = IonQClientBackend()
+    backend.set_seed(seed)
+
+    result = backend.execute_circuit(circuit, nshots=nshots)
+    probs = result.probabilities()
+
+    NP_BACKEND.assert_allclose(probs, target_probs, rtol=1e-1, atol=1e-1)
