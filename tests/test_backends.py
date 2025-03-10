@@ -161,6 +161,5 @@ def test_ionq_backend(nqubits, seed):
     result = backend.execute_circuit(circuit, nshots=nshots)
     probs = result.probabilities()
 
-    print(sum(probs), sum(target_probs))
 
     NP_BACKEND.assert_allclose(probs, target_probs, rtol=1e-1, atol=1e-1)
