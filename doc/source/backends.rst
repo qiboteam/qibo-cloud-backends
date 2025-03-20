@@ -5,6 +5,7 @@ API Reference
 
 Here are reported the Qibo backends that support the execution of Quantum Circuits through different cloud service providers.
 
+
 Qibo Cloud Backend
 ^^^^^^^^^^^^^^^^^^
 
@@ -13,6 +14,7 @@ This backend supports qibo-based providers.
 .. autoclass:: qibo_cloud_backends.qibo_client.QiboClientBackend
     :members:
     :member-order: bysource
+
 
 Qiskit Cloud Backend
 ^^^^^^^^^^^^^^^^^^^^
@@ -42,5 +44,21 @@ This backend provides support for AWS Braket devices, ranging from the LocalSimu
    Circuits with no measurements are not supported yet. Remember to add measurements to your circuit!
 
 .. autoclass:: qibo_cloud_backends.braket_client.BraketClientBackend
+    :members:
+    :member-order: bysource
+
+
+IonQ Cloud Backend
+^^^^^^^^^^^^^^^^^^
+
+This backend supports IonQ as provider, namely the ``qibo`` circuits are loaded as QASM circuits and the job is sent to the IonQ Cloud servers.
+
+.. note::
+   The :meth:`qibo_cloud_backends.ionq_client.IonQClientBackend.execute_circuit` does not take care of any transpilation and expects the passed circuit to be transpiled already.
+
+.. note::
+   Circuits with no measurements are not supported yet. Remember to add measurements to your circuit!
+
+.. autoclass:: qibo_cloud_backends.ionq_client.IonQClientBackend
     :members:
     :member-order: bysource

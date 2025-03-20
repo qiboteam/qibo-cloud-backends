@@ -5,6 +5,7 @@ from typing import Union
 from qibo.config import raise_error
 
 from qibo_cloud_backends.braket_client import BraketClientBackend
+from qibo_cloud_backends.ionq_client import IonQClientBackend
 from qibo_cloud_backends.qibo_client import QiboClientBackend
 from qibo_cloud_backends.qiskit_client import QiskitClientBackend
 
@@ -12,8 +13,8 @@ __version__ = im.version(__package__)
 
 QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend, BraketClientBackend]
 
-CLIENTS = ("qibo-client", "qiskit-client", "braket-client")
-TOKENS = ("QIBO_CLIENT_TOKEN", "IBMQ_TOKEN", None)
+CLIENTS = ("ionq-client", "qibo-client", "qiskit-client", "braket-client")
+TOKENS = ("IONQ_TOKEN", "QIBO_CLIENT_TOKEN", "IBMQ_TOKEN", None)
 
 
 class MetaBackend:
@@ -26,7 +27,8 @@ class MetaBackend:
         """Loads the backend.
 
         Args:
-            client (str): Name of the cloud client to load, one in ("qibo-client", "qiskit-client", "braket-client").
+            client (str): Name of the cloud client to load.
+                Options are ``("ionq-client", "qibo-client", "qiskit-client", "braket-client")``.
             token (str): User token for the remote connection.
             platform (str): Name of the platform to connect to on the provider's servers.
             verbosity (bool): Enable verbose mode for the qibo-client. Default is False.
@@ -36,6 +38,8 @@ class MetaBackend:
 
         if client == "qibo-client":
             return QiboClientBackend(token, platform, verbosity)
+        elif client == "ionq-client":
+            return IonQClientBackend(token, platform)
         elif client == "qiskit-client":
             return QiskitClientBackend(token, platform)
         elif client == "braket-client":
