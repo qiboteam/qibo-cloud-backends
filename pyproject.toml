@@ -54,6 +54,7 @@ furo = "^2023.9.10"
 setuptools = "^75.8.0"
 qiskit_ibm_runtime = "^0.34.0"
 qiskit_ibm_provider = "^0.11"
+qiskit_ionq = "^0.5.4"
 amazon-braket-sdk = "^1.88.3"
 
 [tool.poetry.group.dev]
