@@ -12,7 +12,9 @@ from qibo_cloud_backends.qiskit_client import QiskitClientBackend
 
 __version__ = im.version(__package__)
 
-QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend, BraketClientBackend]
+QibocloudBackend = Union[
+    QiboClientBackend, QiskitClientBackend, BraketClientBackend, NQPIIonsClientBackend
+]
 
 CLIENTS = ("ionq-client", "qibo-client", "qiskit-client", "braket-client", "nqpi-ions")
 TOKENS = ("IONQ_TOKEN", "QIBO_CLIENT_TOKEN", "IBMQ_TOKEN", None, None)
