@@ -70,7 +70,7 @@ class MetaBackend:
         available_backends = {}
         for client, token in zip(CLIENTS, TOKENS):
             kwargs = {}
-            if client != "braket-client":
+            if token is not None:
                 token = tokens.get(client, os.environ.get(token))
                 kwargs.update({"token": token})
             try:
