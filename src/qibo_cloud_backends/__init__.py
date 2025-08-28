@@ -46,7 +46,7 @@ class MetaBackend:
         elif client == "braket-client":
             return BraketClientBackend(verbosity=verbosity)
         elif client == "nqpi-ions":
-            return NQPIIonsClientBackend(token)
+            return NQPIIonsClientBackend()
         else:
             raise_error(
                 ValueError,
