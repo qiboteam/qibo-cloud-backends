@@ -20,7 +20,7 @@ def to_braket(qibo_circuit: QiboCircuit, verbatim_circuit: bool) -> BraketCircui
         if isinstance(translated, Instruction):
             circuit.add_instruction(translated)
         else:
-            circuit.add_instruction(Instruction(_translate_op(gate), gate.qubits))
+            circuit.add_instruction(Instruction(translated, gate.qubits))
 
     # Add verbatim box
     if verbatim_circuit:
