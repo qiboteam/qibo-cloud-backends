@@ -150,17 +150,23 @@ def _(g: qibo_gates.RZ):
 
 @_translate_op.register
 def _(g: qibo_gates.CRX):
-    return Instruction(braket_gates.Rx(g.parameters[0]), g.qubits[1], control=g.qubits[0])
+    return Instruction(
+        braket_gates.Rx(g.parameters[0]), g.qubits[1], control=g.qubits[0]
+    )
 
 
 @_translate_op.register
 def _(g: qibo_gates.CRY):
-    return Instruction(braket_gates.Ry(g.parameters[0]), g.qubits[1], control=g.qubits[0])
+    return Instruction(
+        braket_gates.Ry(g.parameters[0]), g.qubits[1], control=g.qubits[0]
+    )
 
 
 @_translate_op.register
 def _(g: qibo_gates.CRZ):
-    return Instruction(braket_gates.Rz(g.parameters[0]), g.qubits[1], control=g.qubits[0])
+    return Instruction(
+        braket_gates.Rz(g.parameters[0]), g.qubits[1], control=g.qubits[0]
+    )
 
 
 @_translate_op.register
