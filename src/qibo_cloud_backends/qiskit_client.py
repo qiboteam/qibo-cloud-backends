@@ -12,7 +12,8 @@ class QiskitClientBackend(NumpyBackend):
     """Backend for the remote execution of Qiskit circuits on the IBM servers.
 
     Args:
-        token (str): User authentication token. By default this is read from the 'IBMQ_TOKEN' environment variable.
+        token (str): User authentication token. By default this is read from th
+            ``IBMQ_TOKEN`` environment variable.
         platform (str): The IBM platform. Defaults to `"ibm_kyiv"`.
     """
 
@@ -24,7 +25,8 @@ class QiskitClientBackend(NumpyBackend):
             except KeyError:  # pragma: no cover
                 raise_error(
                     RuntimeError,
-                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment variable `IBMQ_TOKEN='your_token'`.",
+                    "No token provided. Please explicitely pass the token `token='your_token'`"
+                    + " or set the environment variable `IBMQ_TOKEN='your_token'`.",
                 )
         if platform is None:
             platform = "ibm_kyiv"
@@ -37,11 +39,13 @@ class QiskitClientBackend(NumpyBackend):
 
         Args:
             circuit (qibo.models.Circuit): The circuit to execute.
-            initial_state (ndarray): The initial state of the circuit. Defaults to `|00...0>`.
+            initial_state (ndarray): The initial state of the circuit.
+                Defaults to :math:`\\ket{0}^{\\otimes n}`.
             nshots (int): Total number of shots.
-            kwargs (dict): Additional keyword arguments passed to the qiskit backends' `run()` method.
+            kwargs (dict): Additional keyword arguments passed to the qiskit backends'
+                `run()` method.
         Returns:
-            (qibo.result.MeasurementOutcomes) The outcome of the circuit execution.
+            :class:`qibo.result.MeasurementOutcomes`: Outcome of the circuit execution.
         """
         if initial_state is not None:
             raise_error(
@@ -58,5 +62,8 @@ class QiskitClientBackend(NumpyBackend):
             sample = [int(bit) for bit in reversed(state)]
             samples += list(repeat(sample, count))
         return MeasurementOutcomes(
-            measurements, backend=self, samples=self.np.asarray(samples), nshots=nshots
+            measurements,
+            backend=self,
+            samples=self.cast(samples, dtype=int),
+            nshots=nshots,
         )

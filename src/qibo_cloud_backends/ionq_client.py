@@ -12,8 +12,9 @@ class IonQClientBackend(NumpyBackend):
     """Backend for the remote execution of Qibo circuits on the IonQ Cloud servers.
 
     Args:
-        token (str, optional): User authentication token. By default this is read from the 'IONQ_TOKEN' environment variable.
-        platform (str, optional ): The IonQ platform. Defaults to `"ionq_simulator"`.
+        token (str, optional): User authentication token. By default this is read from
+            the 'IONQ_TOKEN' environment variable.
+        platform (str, optional): The IonQ platform. Defaults to `"ionq_simulator"`.
     """
 
     def __init__(self, token=None, platform=None, **kwargs):
@@ -24,7 +25,8 @@ class IonQClientBackend(NumpyBackend):
             except KeyError:  # pragma: no cover
                 raise_error(
                     RuntimeError,
-                    "No token provided. Please explicitely pass the token `token='your_token'` or set the environment variable `IONQ_TOKEN='your_token'`.",
+                    "No token provided. Please explicitely pass the token `token='your_token'` "
+                    + " or set the environment variable `IONQ_TOKEN='your_token'`.",
                 )
         if platform is None:
             platform = "ionq_simulator"
@@ -40,9 +42,11 @@ class IonQClientBackend(NumpyBackend):
 
         Args:
             circuit (:class:`qibo.models.Circuit`): Circuit to be executed.
-            initial_state (ndarray, optional): Initial state of the circuit. Defaults to `|00...0>`.
-            nshots (int, optional): Total number of shots. Defaults to :math:`1000`.
-            kwargs (dict, optional): Additional keyword arguments passed to the IonQ backends' `run()` method.
+            initial_state (ndarray, optional): Initial state of the circuit.
+                Defaults to :math:`\\ket{0}^{\\otimes n}`.
+            nshots (int, optional): Total number of shots. Defaults to :math:`10^{3}`.
+            kwargs (dict, optional): Additional keyword arguments passed to the
+                IonQ backends' `run()` method.
 
         Returns:
             :class:`qibo.result.MeasurementOutcomes`: Outcome of the circuit execution.
@@ -62,5 +66,8 @@ class IonQClientBackend(NumpyBackend):
             sample = [int(bit) for bit in state[::-1].split()]
             samples += list(repeat(sample, count))
         return MeasurementOutcomes(
-            measurements, backend=self, samples=self.np.asarray(samples), nshots=nshots
+            measurements,
+            backend=self,
+            samples=self.cast(samples, dtype=int),
+            nshots=nshots,
         )
