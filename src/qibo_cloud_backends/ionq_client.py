@@ -62,5 +62,8 @@ class IonQClientBackend(NumpyBackend):
             sample = [int(bit) for bit in state[::-1].split()]
             samples += list(repeat(sample, count))
         return MeasurementOutcomes(
-            measurements, backend=self, samples=self.np.asarray(samples), nshots=nshots
+            measurements,
+            backend=self,
+            samples=self.cast(samples, dtype=self.int64),
+            nshots=nshots,
         )

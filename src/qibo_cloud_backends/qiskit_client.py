@@ -58,5 +58,8 @@ class QiskitClientBackend(NumpyBackend):
             sample = [int(bit) for bit in reversed(state)]
             samples += list(repeat(sample, count))
         return MeasurementOutcomes(
-            measurements, backend=self, samples=self.np.asarray(samples), nshots=nshots
+            measurements,
+            backend=self,
+            samples=self.cast(samples, dtype=self.int64),
+            nshots=nshots,
         )
