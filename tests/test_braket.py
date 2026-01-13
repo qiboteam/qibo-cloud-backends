@@ -34,9 +34,9 @@ NP_BACKEND = NumpyBackend()
         (gates.RX(0, np.pi), BraketCircuit().rx(0, np.pi)),
         (gates.RY(0, np.pi), BraketCircuit().ry(0, np.pi)),
         (gates.RZ(0, np.pi), BraketCircuit().rz(0, np.pi)),
-        (gates.CRX(0, np.pi), BraketCircuit().rx(0, np.pi)),
-        (gates.CRY(0, np.pi), BraketCircuit().ry(0, np.pi)),
-        (gates.CRZ(0, np.pi), BraketCircuit().rz(0, np.pi)),
+        (gates.CRX(0, 1, np.pi), BraketCircuit().rx(0, np.pi)),
+        (gates.CRY(0, 1, np.pi), BraketCircuit().ry(0, np.pi)),
+        (gates.CRZ(0, 1, np.pi), BraketCircuit().rz(0, np.pi)),
         (gates.RXX(0, 1, np.pi), BraketCircuit().xx(0, 1, np.pi)),
         (gates.RYY(0, 1, np.pi), BraketCircuit().yy(0, 1, np.pi)),
         (gates.RZZ(0, 1, np.pi), BraketCircuit().zz(0, 1, np.pi)),
@@ -66,3 +66,4 @@ def test_to_braket_verbatim():
     assert to_braket(circuit, True) == BraketCircuit().add_verbatim_box(
         BraketCircuit().prx(0, np.pi, np.pi / 2)
     )
+
