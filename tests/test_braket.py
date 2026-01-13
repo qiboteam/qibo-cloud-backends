@@ -66,4 +66,3 @@ def test_to_braket_verbatim():
     assert to_braket(circuit, True) == BraketCircuit().add_verbatim_box(
         BraketCircuit().prx(0, np.pi, np.pi / 2)
     )
-
