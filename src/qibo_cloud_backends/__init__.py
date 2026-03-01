@@ -6,15 +6,28 @@ from qibo.config import raise_error
 
 from qibo_cloud_backends.braket_client import BraketClientBackend
 from qibo_cloud_backends.ionq_client import IonQClientBackend
+from qibo_cloud_backends.nexus_client import NexusClientBackend
 from qibo_cloud_backends.qibo_client import QiboClientBackend
 from qibo_cloud_backends.qiskit_client import QiskitClientBackend
 
 __version__ = im.version(__package__)
 
-QibocloudBackend = Union[QiboClientBackend, QiskitClientBackend, BraketClientBackend]
+QibocloudBackend = Union[
+    BraketClientBackend,
+    IonQClientBackend,
+    NexusClientBackend,
+    QiboClientBackend,
+    QiskitClientBackend,
+]
 
-CLIENTS = ("ionq-client", "qibo-client", "qiskit-client", "braket-client")
-TOKENS = ("IONQ_TOKEN", "QIBO_CLIENT_TOKEN", "IBMQ_TOKEN", None)
+CLIENTS = (
+    "ionq-client",
+    "qibo-client",
+    "qiskit-client",
+    "braket-client",
+    "nexus-client",
+)
+TOKENS = ("IONQ_TOKEN", "QIBO_CLIENT_TOKEN", "IBMQ_TOKEN", None, None)
 
 
 class MetaBackend:
@@ -22,13 +35,17 @@ class MetaBackend:
 
     @staticmethod
     def load(
-        client: str, token: str = None, platform: str = None, verbosity: bool = False
+        client: str,
+        token: str = None,
+        platform: str = None,
+        verbosity: bool = False,
+        **kwargs,
     ) -> QibocloudBackend:
         """Loads the backend.
 
         Args:
             client (str): Name of the cloud client to load.
-                Options are ``("ionq-client", "qibo-client", "qiskit-client", "braket-client")``.
+                Options are ``("ionq-client", "qibo-client", "qiskit-client", "braket-client", "nexus-client")``.
             token (str): User token for the remote connection.
             platform (str): Name of the platform to connect to on the provider's servers.
             verbosity (bool): Enable verbose mode for the qibo-client. Default is False.
@@ -37,13 +54,20 @@ class MetaBackend:
         """
 
         if client == "qibo-client":
-            return QiboClientBackend(token, platform, verbosity)
+            return QiboClientBackend(
+                token=token,
+                platform=platform,
+                verbosity=verbosity,
+                **kwargs,
+            )
         elif client == "ionq-client":
-            return IonQClientBackend(token, platform)
+            return IonQClientBackend(token=token, platform=platform, **kwargs)
         elif client == "qiskit-client":
-            return QiskitClientBackend(token, platform)
+            return QiskitClientBackend(token=token, platform=platform, **kwargs)
         elif client == "braket-client":
-            return BraketClientBackend(verbosity=verbosity)
+            return BraketClientBackend(verbosity=verbosity, token=token, **kwargs)
+        elif client == "nexus-client":
+            return NexusClientBackend(platform=platform, **kwargs)
         else:
             raise_error(
                 ValueError,
@@ -65,7 +89,7 @@ class MetaBackend:
         available_backends = {}
         for client, token in zip(CLIENTS, TOKENS):
             kwargs = {}
-            if client != "braket-client":
+            if token is not None:
                 token = tokens.get(client, os.environ.get(token))
                 kwargs.update({"token": token})
             try:
