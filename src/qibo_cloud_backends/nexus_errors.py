@@ -4,7 +4,7 @@ from __future__ import annotations
 
 
 class NexusBackendError(RuntimeError):
-    """Base class for qibo-nexus backend errors."""
+    """Base class for Nexus backend errors."""
 
 
 class NexusAuthError(NexusBackendError):

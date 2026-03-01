@@ -1,24 +1,19 @@
 import importlib.metadata as im
-import os
-from typing import Union
+from importlib import import_module
+from typing import TYPE_CHECKING, Any
 
 from qibo.config import raise_error
 
-from qibo_cloud_backends.braket_client import BraketClientBackend
-from qibo_cloud_backends.ionq_client import IonQClientBackend
-from qibo_cloud_backends.nexus_client import NexusClientBackend
-from qibo_cloud_backends.qibo_client import QiboClientBackend
-from qibo_cloud_backends.qiskit_client import QiskitClientBackend
+if TYPE_CHECKING:
+    from qibo_cloud_backends.braket_client import BraketClientBackend
+    from qibo_cloud_backends.ionq_client import IonQClientBackend
+    from qibo_cloud_backends.nexus_client import NexusClientBackend
+    from qibo_cloud_backends.qibo_client import QiboClientBackend
+    from qibo_cloud_backends.qiskit_client import QiskitClientBackend
 
 __version__ = im.version(__package__)
 
-QibocloudBackend = Union[
-    BraketClientBackend,
-    IonQClientBackend,
-    NexusClientBackend,
-    QiboClientBackend,
-    QiskitClientBackend,
-]
+QibocloudBackend = Any
 
 CLIENTS = (
     "ionq-client",
@@ -28,6 +23,61 @@ CLIENTS = (
     "nexus-client",
 )
 TOKENS = ("IONQ_TOKEN", "QIBO_CLIENT_TOKEN", "IBMQ_TOKEN", None, None)
+_CLIENT_MODULES = {
+    "braket-client": ("qibo_cloud_backends.braket_client", "BraketClientBackend"),
+    "ionq-client": ("qibo_cloud_backends.ionq_client", "IonQClientBackend"),
+    "nexus-client": ("qibo_cloud_backends.nexus_client", "NexusClientBackend"),
+    "qibo-client": ("qibo_cloud_backends.qibo_client", "QiboClientBackend"),
+    "qiskit-client": ("qibo_cloud_backends.qiskit_client", "QiskitClientBackend"),
+}
+_EXPORTED_CLASSES = {
+    "BraketClientBackend": ("qibo_cloud_backends.braket_client", "BraketClientBackend"),
+    "IonQClientBackend": ("qibo_cloud_backends.ionq_client", "IonQClientBackend"),
+    "NexusClientBackend": ("qibo_cloud_backends.nexus_client", "NexusClientBackend"),
+    "QiboClientBackend": ("qibo_cloud_backends.qibo_client", "QiboClientBackend"),
+    "QiskitClientBackend": ("qibo_cloud_backends.qiskit_client", "QiskitClientBackend"),
+}
+
+
+def _load_client_class(client: str):
+    module_name, class_name = _CLIENT_MODULES[client]
+    module = import_module(module_name)
+    return getattr(module, class_name)
+
+
+def _client_available(client: str) -> bool:
+    try:
+        backend_class = _load_client_class(client)
+        if client == "nexus-client":
+            module = import_module("qibo_cloud_backends.nexus_client")
+            getattr(module, "_ensure_nexus_dependencies")()
+        else:
+            _ = backend_class
+        return True
+    except Exception:
+        return False
+
+
+def __getattr__(name: str):
+    if name in _EXPORTED_CLASSES:
+        module_name, class_name = _EXPORTED_CLASSES[name]
+        module = import_module(module_name)
+        return getattr(module, class_name)
+    raise AttributeError(f"module {__package__!r} has no attribute {name!r}")
+
+
+__all__ = [
+    "BraketClientBackend",
+    "CLIENTS",
+    "IonQClientBackend",
+    "MetaBackend",
+    "NexusClientBackend",
+    "QiboClientBackend",
+    "QibocloudBackend",
+    "QiskitClientBackend",
+    "TOKENS",
+    "__version__",
+]
 
 
 class MetaBackend:
@@ -54,20 +104,25 @@ class MetaBackend:
         """
 
         if client == "qibo-client":
-            return QiboClientBackend(
+            backend_class = _load_client_class(client)
+            return backend_class(
                 token=token,
                 platform=platform,
                 verbosity=verbosity,
                 **kwargs,
             )
         elif client == "ionq-client":
-            return IonQClientBackend(token=token, platform=platform, **kwargs)
+            backend_class = _load_client_class(client)
+            return backend_class(token=token, platform=platform, **kwargs)
         elif client == "qiskit-client":
-            return QiskitClientBackend(token=token, platform=platform, **kwargs)
+            backend_class = _load_client_class(client)
+            return backend_class(token=token, platform=platform, **kwargs)
         elif client == "braket-client":
-            return BraketClientBackend(verbosity=verbosity, token=token, **kwargs)
+            backend_class = _load_client_class(client)
+            return backend_class(verbosity=verbosity, token=token, **kwargs)
         elif client == "nexus-client":
-            return NexusClientBackend(platform=platform, **kwargs)
+            backend_class = _load_client_class(client)
+            return backend_class(platform=platform, **kwargs)
         else:
             raise_error(
                 ValueError,
@@ -87,15 +142,6 @@ class MetaBackend:
         if tokens is None:
             tokens = {}
         available_backends = {}
-        for client, token in zip(CLIENTS, TOKENS):
-            kwargs = {}
-            if token is not None:
-                token = tokens.get(client, os.environ.get(token))
-                kwargs.update({"token": token})
-            try:
-                MetaBackend.load(client=client, **kwargs)
-                available = True
-            except:
-                available = False
-            available_backends[client] = available
+        for client in CLIENTS:
+            available_backends[client] = _client_available(client)
         return available_backends
