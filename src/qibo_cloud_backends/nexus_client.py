@@ -870,9 +870,66 @@ class NexusClientBackend(NumpyBackend):
             shot_values = _normalize_batch_nshots(nshots, len(circuits))
             if isinstance(shot_values, int):
                 shot_values = [shot_values] * len(circuits)
+
+            qnx = _import_qnexus()
+            program_refs: list[Any] = []
+            metadata_list: list[TranslationMetadata] = []
+            for idx, (circuit, params) in enumerate(zip(circuits, parameters_list)):
+                self._assert_supported_execution(circuit, None)
+                program_ref, metadata = self._upload_translated_program(
+                    circuit, parameters=params, sequence_idx=idx
+                )
+                program_refs.append(program_ref)
+                metadata_list.append(metadata)
+
+            costs = _estimate_helios_costs_batch(
+                qnx=qnx,
+                programs=program_refs,
+                n_shots=shot_values,
+                platform_name=parse_platform(self.config.platform)[1],
+                project=self._project_ref,
+            )
+            max_batch_cost = sum(costs)
+
+            batch_cfg = replace(
+                self.config,
+                backend_options={
+                    **self.config.backend_options,
+                    "attempt_batching": True,
+                    "max_batch_cost": max_batch_cost,
+                },
+            )
+            backend_config = build_nexus_backend_config(batch_cfg)
+
+            execution_items = _execute_programs(
+                qnx=qnx,
+                programs=program_refs,
+                n_shots=shot_values,
+                backend_config=backend_config,
+                timeout=self.config.timeout,
+                allow_incomplete=self.config.allow_incomplete,
+                language=None,
+                platform=self.config.platform,
+                job_name_prefix=self.config.job_name_prefix,
+                project=self._project_ref,
+            )
+
+            if len(execution_items) != len(circuits):
+                raise NexusBackendError(
+                    f"Helios batch execute returned {len(execution_items)} items "
+                    f"for {len(circuits)} circuits."
+                )
+
             return [
-                self.execute_circuit(circuit, nshots=shots, parameters=params)
-                for circuit, shots, params in zip(circuits, shot_values, parameters_list)
+                self._map_execution_result(
+                    execution_result_ref=item,
+                    circuit=circuit,
+                    nshots=shots,
+                    metadata=metadata,
+                )
+                for item, circuit, metadata, shots in zip(
+                    execution_items, circuits, metadata_list, shot_values
+                )
             ]
 
         if not self.config.batch_mode:

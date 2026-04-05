@@ -62,7 +62,7 @@ def _should_use_helios_emulator(name: str, forced: Any) -> bool:
     if forced is not None:
         return bool(forced)
     lowered = name.lower()
-    return "emulator" in lowered or lowered.endswith("-1e") or lowered.endswith("-1sc")
+    return "emulator" in lowered or lowered.endswith("-1e")
 
 
 def _resolve_qnexus_model(qnx: Any, name: str) -> Any:
