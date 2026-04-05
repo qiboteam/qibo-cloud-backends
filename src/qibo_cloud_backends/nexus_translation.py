@@ -20,6 +20,10 @@ class TranslationMetadata:
     qasm: str
 
 
+def _is_measurement_gate(gate: Any) -> bool:
+    return str(gate.name).lower() in {"m", "measure", "measurement"}
+
+
 def _to_int_qubit_sequence(values: Iterable[Any]) -> list[int]:
     return [int(v) for v in values]
 
@@ -29,7 +33,7 @@ def extract_measurement_qubits(circuit: Circuit) -> list[int]:
 
     measured: list[int] = []
     for gate in circuit.queue:
-        if str(gate.name).lower() not in {"m", "measure", "measurement"}:
+        if not _is_measurement_gate(gate):
             continue
         measured.extend(_to_int_qubit_sequence(gate.target_qubits))
 
@@ -49,7 +53,7 @@ def _has_multicontrolled_gates(circuit: Circuit) -> bool:
 def _normalize_measurement_register_names(circuit: Circuit) -> None:
     index = 0
     for gate in circuit.queue:
-        if str(gate.name).lower() not in {"m", "measure", "measurement"}:
+        if not _is_measurement_gate(gate):
             continue
 
         current = gate.register_name
@@ -115,6 +119,28 @@ def _replace_unitary_basis_rotations(circuit: Circuit) -> Circuit:
     return new_circuit
 
 
+def _ensure_terminal_measurements(circuit: Circuit) -> None:
+    seen_measurement = False
+    for gate in circuit.queue:
+        is_measurement = _is_measurement_gate(gate)
+        if not seen_measurement:
+            seen_measurement = is_measurement
+            continue
+        if not is_measurement:
+            raise NexusBackendError(
+                "Helios execution currently requires all measurements to be terminal."
+            )
+
+
+def _strip_measurements(circuit: Circuit) -> Circuit:
+    stripped = Circuit(circuit.nqubits)
+    for gate in circuit.queue:
+        if _is_measurement_gate(gate):
+            continue
+        stripped.add(gate)
+    return stripped
+
+
 def prepare_qibo_circuit(circuit: Circuit, parameters: Any = None) -> tuple[Circuit, str]:
     """Run QASM preflight and return a QASM-ready circuit and QASM string."""
 
@@ -162,9 +188,53 @@ def translate_qibo_to_pytket(
     return pytket_circuit, metadata
 
 
+def translate_qibo_to_pytket_for_helios(
+    circuit: Circuit, parameters: Any = None
+) -> tuple[Any, TranslationMetadata]:
+    """Translate a Qibo circuit to a pytket circuit suitable for Helios HUGR generation."""
+
+    working, _ = prepare_qibo_circuit(circuit, parameters=parameters)
+    _ensure_terminal_measurements(working)
+
+    measured_qubits = extract_measurement_qubits(working)
+    if len(measured_qubits) != len(set(measured_qubits)):
+        raise NexusBackendError(
+            "Helios execution currently requires each measured qubit to be measured once."
+        )
+
+    stripped = _strip_measurements(working)
+    try:
+        try:
+            qasm = stripped.to_qasm(extended_compatibility=True)
+        except TypeError:
+            qasm = stripped.to_qasm()
+    except Exception as exc:
+        raise NexusBackendError(
+            f"Failed to export measurement-free Qibo circuit to OpenQASM: {exc}"
+        ) from exc
+
+    try:
+        from pytket.qasm import circuit_from_qasm_str
+    except Exception as exc:  # pragma: no cover - import environment specific
+        raise NexusBackendError("pytket.qasm is required for QASM translation.") from exc
+
+    try:
+        pytket_circuit = circuit_from_qasm_str(qasm)
+    except Exception as exc:
+        raise NexusBackendError(f"Failed to parse OpenQASM with pytket: {exc}") from exc
+
+    metadata = TranslationMetadata(
+        measured_qubits=measured_qubits,
+        nqubits=working.nqubits,
+        qasm=qasm,
+    )
+    return pytket_circuit, metadata
+
+
 __all__ = [
     "TranslationMetadata",
     "extract_measurement_qubits",
     "prepare_qibo_circuit",
     "translate_qibo_to_pytket",
+    "translate_qibo_to_pytket_for_helios",
 ]

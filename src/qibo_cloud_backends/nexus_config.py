@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import inspect
 from typing import Any
 
 _SUPPORTED_PLATFORM_FAMILIES = {"hseries", "helios", "aer"}
@@ -64,8 +65,79 @@ def _should_use_helios_emulator(name: str, forced: Any) -> bool:
     return "emulator" in lowered or lowered.endswith("-1e") or lowered.endswith("-1sc")
 
 
+def _resolve_qnexus_model(qnx: Any, name: str) -> Any:
+    model = getattr(qnx, name, None)
+    if model is not None:
+        return model
+    models = getattr(qnx, "models", None)
+    if models is None:
+        return None
+    return getattr(models, name, None)
 
-def build_nexus_backend_config(cfg: NexusBackendConfig) -> Any:
+
+def _call_named_constructor(model: Any, *, name: str, **kwargs: Any) -> Any:
+    for field_name in ("system_name", "hardware_name", "device_name"):
+        try:
+            return model(**{field_name: name, **kwargs})
+        except TypeError:
+            continue
+    return model(name=name, **kwargs)
+
+
+def _supports_parameter(model: Any, parameter: str) -> bool:
+    try:
+        return parameter in inspect.signature(model).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def _build_helios_backend_config(
+    qnx: Any,
+    *,
+    name: str,
+    options: dict[str, Any],
+    n_qubits: int | None,
+    max_cost: float | None,
+) -> Any:
+    helios_config_cls = _resolve_qnexus_model(qnx, "HeliosConfig")
+    helios_emulator_cls = _resolve_qnexus_model(qnx, "HeliosEmulatorConfig")
+    if helios_config_cls is None:
+        return qnx.QuantinuumConfig(device_name=name, **options)
+
+    forced_emulator = options.pop("emulator", None)
+    emulator_requested = _should_use_helios_emulator(name, forced_emulator)
+    max_cost_value = options.pop("max_cost", None)
+    if max_cost is not None:
+        max_cost_value = float(max_cost)
+
+    if emulator_requested and helios_emulator_cls is not None:
+        emulator_options = dict(options)
+        if n_qubits is not None:
+            emulator_options.setdefault("n_qubits", int(n_qubits))
+
+        if _supports_parameter(helios_config_cls, "emulator_config"):
+            emulator_config = helios_emulator_cls(**emulator_options)
+            config_options: dict[str, Any] = {"emulator_config": emulator_config}
+            if max_cost_value is not None:
+                config_options["max_cost"] = max_cost_value
+            return _call_named_constructor(helios_config_cls, name=name, **config_options)
+
+        if max_cost_value is not None:
+            emulator_options.setdefault("max_cost", max_cost_value)
+        return _call_named_constructor(helios_emulator_cls, name=name, **emulator_options)
+
+    config_options = dict(options)
+    if max_cost_value is not None:
+        config_options["max_cost"] = max_cost_value
+    return _call_named_constructor(helios_config_cls, name=name, **config_options)
+
+
+def build_nexus_backend_config(
+    cfg: NexusBackendConfig,
+    *,
+    n_qubits: int | None = None,
+    max_cost: float | None = None,
+) -> Any:
     """Build a concrete qnexus backend config object for compile/execute jobs."""
 
     try:
@@ -83,13 +155,10 @@ def build_nexus_backend_config(cfg: NexusBackendConfig) -> Any:
         options.pop("emulator", None)
         return qnx.QuantinuumConfig(device_name=name, **options)
 
-    forced_emulator = options.pop("emulator", None)
-    has_helios_api = hasattr(qnx, "HeliosConfig") and hasattr(qnx, "HeliosEmulatorConfig")
-
-    if has_helios_api:
-        if _should_use_helios_emulator(name, forced_emulator):
-            return qnx.HeliosEmulatorConfig(hardware_name=name, **options)
-        return qnx.HeliosConfig(hardware_name=name, **options)
-
-    # No HeliosConfig: go through QuantinuumConfig.
-    return qnx.QuantinuumConfig(device_name=name, **options)
+    return _build_helios_backend_config(
+        qnx,
+        name=name,
+        options=options,
+        n_qubits=n_qubits,
+        max_cost=max_cost,
+    )

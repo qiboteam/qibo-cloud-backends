@@ -1,3 +1,4 @@
+import importlib.util
 import os
 import sys
 
@@ -16,9 +17,11 @@ from qibo_cloud_backends import (
     BraketClientBackend,
     IonQClientBackend,
     MetaBackend,
+    NexusClientBackend,
     QiboClientBackend,
     QiskitClientBackend,
 )
+import qibo_cloud_backends.nexus_client as nexus_mod
 
 NP_BACKEND = NumpyBackend()
 QISKIT_TK = os.environ.get("IBMQ_TOKEN")
@@ -88,7 +91,26 @@ def test_set_backend(backend, token):
         assert get_backend().name == backend
 
 
+def test_meta_backend_load_nexus_client(monkeypatch):
+    monkeypatch.setattr(nexus_mod, "_ensure_nexus_dependencies", lambda: None)
+    backend = MetaBackend.load(client="nexus-client", platform="hseries:H2-1LE")
+    assert isinstance(backend, NexusClientBackend)
+    assert backend.name == "nexus-client"
+
+
+def test_set_backend_nexus_client(monkeypatch):
+    monkeypatch.setattr(nexus_mod, "_ensure_nexus_dependencies", lambda: None)
+    set_backend("qibo-cloud-backends", client="nexus-client", platform="hseries:H2-1LE")
+    assert isinstance(get_backend(), NexusClientBackend)
+    assert get_backend().name == "nexus-client"
+
+
 def test_list_available_backends():
+    nexus_available = (
+        importlib.util.find_spec("qnexus") is not None
+        and importlib.util.find_spec("pytket") is not None
+        and importlib.util.find_spec("pytket.qasm") is not None
+    )
     available_backends = {
         "numpy": True,
         "qulacs": False,
@@ -97,6 +119,7 @@ def test_list_available_backends():
             "qiskit-client": True,
             "braket-client": True,
             "ionq-client": True,
+            "nexus-client": nexus_available,
         },
     }
     assert list_available_backends("qibo-cloud-backends") == available_backends

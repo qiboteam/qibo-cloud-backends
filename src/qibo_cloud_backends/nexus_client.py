@@ -14,11 +14,12 @@ from qibo.backends import NumpyBackend
 from qibo.models import Circuit
 
 from .nexus_auth import authenticate, ensure_project
-from .nexus_config import NexusBackendConfig, build_nexus_backend_config
+from .nexus_config import NexusBackendConfig, build_nexus_backend_config, parse_platform
 from .nexus_errors import (
     NexusBackendError,
     UnsupportedExecutionError,
 )
+from .nexus_helios import build_helios_hugr_package, map_helios_result_to_qibo
 from .nexus_results import map_nexus_result_to_qibo
 from .nexus_translation import TranslationMetadata, translate_qibo_to_pytket
 
@@ -347,10 +348,41 @@ def _estimate_prepared_compilation(
     )
 
 
-def _execute_prepared_compilation(
+def _estimate_helios_cost(
     *,
     qnx: Any,
-    prepared: _PreparedCompilation,
+    program: Any,
+    nshots: int,
+    platform_name: str,
+    project: Any = None,
+) -> float:
+    try:
+        cost = qnx.hugr.cost(
+            programs=[program],
+            n_shots=[int(nshots)],
+            project=project,
+            system_name=platform_name,
+        )
+    except TypeError:
+        cost = qnx.hugr.cost(
+            programs=program,
+            n_shots=int(nshots),
+            project=project,
+            system_name=platform_name,
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise NexusBackendError(f"Failed to estimate Helios execution cost: {exc}") from exc
+    try:
+        return float(cost)
+    except (TypeError, ValueError) as exc:
+        raise NexusBackendError(f"Invalid Helios cost estimate returned: {cost!r}") from exc
+
+
+def _execute_programs(
+    *,
+    qnx: Any,
+    programs: list[Any],
+    n_shots: int | list[int],
     backend_config: Any,
     timeout: float,
     allow_incomplete: bool,
@@ -363,8 +395,8 @@ def _execute_prepared_compilation(
 
     try:
         execute_kwargs = {
-            "programs": prepared.compiled_programs,
-            "n_shots": prepared.submission_n_shots,
+            "programs": programs,
+            "n_shots": n_shots,
             "backend_config": backend_config,
             "name": execute_name,
             "project": project,
@@ -379,7 +411,6 @@ def _execute_prepared_compilation(
         "Nexus execute job submitted",
         extra={
             "platform": platform,
-            "compile_job_id": prepared.compile_job_id,
             "execute_job_id": _job_id(execute_job),
         },
     )
@@ -409,6 +440,32 @@ def _execute_prepared_compilation(
         )
 
     return list(items)
+
+
+def _execute_prepared_compilation(
+    *,
+    qnx: Any,
+    prepared: _PreparedCompilation,
+    backend_config: Any,
+    timeout: float,
+    allow_incomplete: bool,
+    language: Any,
+    platform: str,
+    job_name_prefix: str | None = None,
+    project: Any = None,
+) -> list[Any]:
+    return _execute_programs(
+        qnx=qnx,
+        programs=prepared.compiled_programs,
+        n_shots=prepared.submission_n_shots,
+        backend_config=backend_config,
+        timeout=timeout,
+        allow_incomplete=allow_incomplete,
+        language=language,
+        platform=platform,
+        job_name_prefix=job_name_prefix,
+        project=project,
+    )
 
 
 def run_compile_execute(
@@ -515,9 +572,49 @@ class NexusClientBackend(NumpyBackend):
             credential_login=self.config.credential_login,
         )
         self._project_ref = ensure_project(self.config.project)
-        self._backend_config = build_nexus_backend_config(self.config)
-        self._resolved_language = _resolve_language(self.config.language)
+        if self.config.platform_family == "helios":
+            self._backend_config = None
+            self._resolved_language = None
+        else:
+            self._backend_config = build_nexus_backend_config(self.config)
+            self._resolved_language = _resolve_language(self.config.language)
         self._connected = True
+
+    def _build_execution_backend_config(
+        self,
+        *,
+        nqubits: int | None = None,
+        max_cost: float | None = None,
+    ) -> Any:
+        if self.config.platform_family != "helios":
+            return self._backend_config
+        return build_nexus_backend_config(
+            self.config,
+            n_qubits=nqubits,
+            max_cost=max_cost,
+        )
+
+    def _map_execution_result(
+        self,
+        *,
+        execution_result_ref: Any,
+        circuit: Circuit,
+        nshots: int,
+        metadata: TranslationMetadata,
+    ) -> Any:
+        mapper = (
+            map_helios_result_to_qibo
+            if self.config.platform_family == "helios"
+            else map_nexus_result_to_qibo
+        )
+        return mapper(
+            execution_result_ref=execution_result_ref,
+            circuit=circuit,
+            backend=self,
+            nshots=nshots,
+            measured_qubits=metadata.measured_qubits,
+            reverse_endianness=self.config.reverse_endianness,
+        )
 
     def _assert_supported_execution(self, circuit: Circuit, initial_state: Any) -> None:
         if initial_state is not None:
@@ -538,10 +635,25 @@ class NexusClientBackend(NumpyBackend):
         sequence_idx: int = 0,
     ) -> tuple[Any, TranslationMetadata]:
         self._ensure_connected()
-        pytket_circuit, metadata = translate_qibo_to_pytket(circuit, parameters=parameters)
-
         qnx = _import_qnexus()
         upload_name = _job_name(self.config.job_name_prefix, "program", str(sequence_idx))
+        if self.config.platform_family == "helios":
+            hugr_package, metadata = build_helios_hugr_package(
+                circuit,
+                parameters=parameters,
+                entrypoint_name=f"helios_entrypoint_{sequence_idx}",
+            )
+            try:
+                program_ref = qnx.hugr.upload(
+                    hugr_package=hugr_package,
+                    name=upload_name,
+                    project=self._project_ref,
+                )
+            except Exception as exc:  # noqa: BLE001
+                raise NexusBackendError(f"Failed to upload Helios HUGR to Nexus: {exc}") from exc
+            return program_ref, metadata
+
+        pytket_circuit, metadata = translate_qibo_to_pytket(circuit, parameters=parameters)
         try:
             circuit_ref = qnx.circuits.upload(
                 circuit=pytket_circuit,
@@ -566,24 +678,50 @@ class NexusClientBackend(NumpyBackend):
         self._ensure_connected()
         shots = _normalize_nshots(nshots)
 
-        circuit_ref, metadata = self._upload_translated_program(
+        program_ref, metadata = self._upload_translated_program(
             circuit,
             parameters=parameters,
             sequence_idx=0,
         )
 
-        execution_items = run_compile_execute(
-            programs=[circuit_ref],
-            backend_config=self._backend_config,
-            optimisation_level=self.config.optimisation_level,
-            n_shots=shots,
-            timeout=self.config.timeout,
-            allow_incomplete=self.config.allow_incomplete,
-            language=self._resolved_language,
-            platform=self.config.platform,
-            job_name_prefix=self.config.job_name_prefix,
-            project=self._project_ref,
-        )
+        if self.config.platform_family == "helios":
+            qnx = _import_qnexus()
+            max_cost = _estimate_helios_cost(
+                qnx=qnx,
+                program=program_ref,
+                nshots=shots,
+                platform_name=parse_platform(self.config.platform)[1],
+                project=self._project_ref,
+            )
+            backend_config = self._build_execution_backend_config(
+                nqubits=metadata.nqubits,
+                max_cost=max_cost,
+            )
+            execution_items = _execute_programs(
+                qnx=qnx,
+                programs=[program_ref],
+                n_shots=shots,
+                backend_config=backend_config,
+                timeout=self.config.timeout,
+                allow_incomplete=self.config.allow_incomplete,
+                language=None,
+                platform=self.config.platform,
+                job_name_prefix=self.config.job_name_prefix,
+                project=self._project_ref,
+            )
+        else:
+            execution_items = run_compile_execute(
+                programs=[program_ref],
+                backend_config=self._backend_config,
+                optimisation_level=self.config.optimisation_level,
+                n_shots=shots,
+                timeout=self.config.timeout,
+                allow_incomplete=self.config.allow_incomplete,
+                language=self._resolved_language,
+                platform=self.config.platform,
+                job_name_prefix=self.config.job_name_prefix,
+                project=self._project_ref,
+            )
 
         LOGGER.info(
             "Nexus execution completed",
@@ -595,13 +733,11 @@ class NexusClientBackend(NumpyBackend):
             },
         )
 
-        return map_nexus_result_to_qibo(
+        return self._map_execution_result(
             execution_result_ref=execution_items[0],
             circuit=circuit,
-            backend=self,
             nshots=shots,
-            measured_qubits=metadata.measured_qubits,
-            reverse_endianness=self.config.reverse_endianness,
+            metadata=metadata,
         )
 
     def estimate_circuit(
@@ -618,14 +754,37 @@ class NexusClientBackend(NumpyBackend):
         self._ensure_connected()
         qnx = _import_qnexus()
 
-        circuit_ref, _ = self._upload_translated_program(
+        program_ref, metadata = self._upload_translated_program(
             circuit,
             parameters=parameters,
             sequence_idx=0,
         )
+        if self.config.platform_family == "helios":
+            hqcs = _estimate_helios_cost(
+                qnx=qnx,
+                program=program_ref,
+                nshots=shots,
+                platform_name=parse_platform(self.config.platform)[1],
+                project=self._project_ref,
+            )
+            return ExecutionEstimate(
+                platform=self.config.platform,
+                optimisation_level=self.config.optimisation_level,
+                batch_mode=False,
+                total_hqcs=hqcs,
+                items=[
+                    EstimateItem(
+                        sequence_idx=0,
+                        nshots=shots,
+                        hqcs=hqcs,
+                        compile_job_id=_job_id(program_ref),
+                    )
+                ],
+            )
+
         prepared = _prepare_compiled_programs(
             qnx=qnx,
-            programs=[circuit_ref],
+            programs=[program_ref],
             backend_config=self._backend_config,
             optimisation_level=self.config.optimisation_level,
             n_shots=shots,
@@ -661,6 +820,21 @@ class NexusClientBackend(NumpyBackend):
         if not circuits:
             return []
         self._ensure_connected()
+
+        if self.config.platform_family == "helios":
+            if parameters_list is None:
+                parameters_list = [None] * len(circuits)
+            if len(parameters_list) != len(circuits):
+                raise ValueError(
+                    "parameters_list cardinality mismatch with circuits in execute_circuits."
+                )
+            shot_values = _normalize_batch_nshots(nshots, len(circuits))
+            if isinstance(shot_values, int):
+                shot_values = [shot_values] * len(circuits)
+            return [
+                self.execute_circuit(circuit, nshots=shots, parameters=params)
+                for circuit, shots, params in zip(circuits, shot_values, parameters_list)
+            ]
 
         if not self.config.batch_mode:
             if parameters_list is None:
@@ -732,13 +906,11 @@ class NexusClientBackend(NumpyBackend):
             execution_items, circuits, metadata_list, shot_values
         ):
             results.append(
-                map_nexus_result_to_qibo(
+                self._map_execution_result(
                     execution_result_ref=item,
                     circuit=circuit,
-                    backend=self,
                     nshots=shots,
-                    measured_qubits=metadata.measured_qubits,
-                    reverse_endianness=self.config.reverse_endianness,
+                    metadata=metadata,
                 )
             )
         return results
@@ -771,6 +943,41 @@ class NexusClientBackend(NumpyBackend):
         if len(parameters_list) != len(circuits):
             raise ValueError(
                 "parameters_list cardinality mismatch with circuits in estimate_circuits."
+            )
+
+        if self.config.platform_family == "helios":
+            shot_values = _normalize_batch_nshots(nshots, len(circuits))
+            if isinstance(shot_values, int):
+                shot_values = [shot_values] * len(circuits)
+            items: list[EstimateItem] = []
+            for idx, (circuit, shots, params) in enumerate(zip(circuits, shot_values, parameters_list)):
+                self._assert_supported_execution(circuit, None)
+                program_ref, _ = self._upload_translated_program(
+                    circuit,
+                    parameters=params,
+                    sequence_idx=idx,
+                )
+                hqcs = _estimate_helios_cost(
+                    qnx=qnx,
+                    program=program_ref,
+                    nshots=shots,
+                    platform_name=parse_platform(self.config.platform)[1],
+                    project=self._project_ref,
+                )
+                items.append(
+                    EstimateItem(
+                        sequence_idx=idx,
+                        nshots=shots,
+                        hqcs=hqcs,
+                        compile_job_id=_job_id(program_ref),
+                    )
+                )
+            return ExecutionEstimate(
+                platform=self.config.platform,
+                optimisation_level=self.config.optimisation_level,
+                batch_mode=False,
+                total_hqcs=sum(item.hqcs for item in items),
+                items=items,
             )
 
         if not self.config.batch_mode:
