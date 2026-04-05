@@ -357,25 +357,64 @@ def _estimate_helios_cost(
     project: Any = None,
 ) -> float:
     try:
-        cost = qnx.hugr.cost(
+        results = qnx.hugr.cost_confidence(
             programs=[program],
             n_shots=[int(nshots)],
-            project=project,
-            system_name=platform_name,
-        )
-    except TypeError:
-        cost = qnx.hugr.cost(
-            programs=program,
-            n_shots=int(nshots),
             project=project,
             system_name=platform_name,
         )
     except Exception as exc:  # noqa: BLE001
         raise NexusBackendError(f"Failed to estimate Helios execution cost: {exc}") from exc
     try:
-        return float(cost)
+        items = list(results)
+        if not items or not isinstance(items[0], tuple) or len(items[0]) < 1 or items[0][0] is None:
+            raise ValueError(f"unexpected result shape: {items!r}")
+        return float(items[0][0])
     except (TypeError, ValueError) as exc:
-        raise NexusBackendError(f"Invalid Helios cost estimate returned: {cost!r}") from exc
+        raise NexusBackendError(f"Invalid Helios cost estimate returned: {results!r}") from exc
+
+
+def _estimate_helios_costs_batch(
+    *,
+    qnx: Any,
+    programs: list[Any],
+    n_shots: list[int],
+    platform_name: str,
+    project: Any = None,
+) -> list[float]:
+    try:
+        results = qnx.hugr.cost_confidence(
+            programs=programs,
+            n_shots=n_shots,
+            project=project,
+            system_name=platform_name,
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise NexusBackendError(f"Failed to estimate Helios execution costs: {exc}") from exc
+    try:
+        items = list(results)
+    except (TypeError, ValueError) as exc:
+        raise NexusBackendError(
+            f"Invalid Helios cost estimate returned: {results!r}"
+        ) from exc
+    if len(items) != len(programs):
+        raise NexusBackendError(
+            f"Helios batch cost estimate returned {len(items)} values "
+            f"for {len(programs)} programs."
+        )
+    costs: list[float] = []
+    for idx, item in enumerate(items):
+        if not isinstance(item, tuple) or len(item) < 1 or item[0] is None:
+            raise NexusBackendError(
+                f"Invalid Helios cost estimate at index {idx}: {item!r}"
+            )
+        try:
+            costs.append(float(item[0]))
+        except (TypeError, ValueError) as exc:
+            raise NexusBackendError(
+                f"Invalid Helios cost estimate at index {idx}: {item!r}"
+            ) from exc
+    return costs
 
 
 def _execute_programs(
@@ -949,29 +988,36 @@ class NexusClientBackend(NumpyBackend):
             shot_values = _normalize_batch_nshots(nshots, len(circuits))
             if isinstance(shot_values, int):
                 shot_values = [shot_values] * len(circuits)
-            items: list[EstimateItem] = []
-            for idx, (circuit, shots, params) in enumerate(zip(circuits, shot_values, parameters_list)):
+
+            program_refs: list[Any] = []
+            for idx, (circuit, params) in enumerate(zip(circuits, parameters_list)):
                 self._assert_supported_execution(circuit, None)
                 program_ref, _ = self._upload_translated_program(
                     circuit,
                     parameters=params,
                     sequence_idx=idx,
                 )
-                hqcs = _estimate_helios_cost(
-                    qnx=qnx,
-                    program=program_ref,
+                program_refs.append(program_ref)
+
+            hqcs_list = _estimate_helios_costs_batch(
+                qnx=qnx,
+                programs=program_refs,
+                n_shots=shot_values,
+                platform_name=parse_platform(self.config.platform)[1],
+                project=self._project_ref,
+            )
+
+            items: list[EstimateItem] = [
+                EstimateItem(
+                    sequence_idx=idx,
                     nshots=shots,
-                    platform_name=parse_platform(self.config.platform)[1],
-                    project=self._project_ref,
+                    hqcs=hqcs,
+                    compile_job_id=_job_id(program_ref),
                 )
-                items.append(
-                    EstimateItem(
-                        sequence_idx=idx,
-                        nshots=shots,
-                        hqcs=hqcs,
-                        compile_job_id=_job_id(program_ref),
-                    )
+                for idx, (program_ref, shots, hqcs) in enumerate(
+                    zip(program_refs, shot_values, hqcs_list)
                 )
+            ]
             return ExecutionEstimate(
                 platform=self.config.platform,
                 optimisation_level=self.config.optimisation_level,
