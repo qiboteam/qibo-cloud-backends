@@ -20,7 +20,7 @@ classifiers = [
 packages = [{ include = "qibo_cloud_backends", from = "src" }]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.10,<3.13"
 qibo = "^0.2.16"
 qibo_client = "^0.0.17"
 setuptools = { version = "^75.8.0", optional = true }
@@ -28,6 +28,9 @@ qiskit_ibm_runtime = { version = "^0.34.0", optional = true }
 qiskit_ibm_provider = { version = "^0.11", optional = true }
 qiskit_ionq = { version = "^0.5.4", optional = true }
 amazon-braket-sdk = { version = "^1.88.3", optional = true }
+qnexus = { version = "^0.39", optional = true }
+pytket = { version = ">=2.8,<3", optional = true }
+guppylang = { version = "^0.21", optional = true }
 
 [tool.poetry.group.tests]
 optional = true
@@ -67,6 +70,7 @@ pdbpp = "^0.10.3"
 [tool.poetry.extras]
 aws = ["amazon-braket-sdk"]
 ionq = ["qiskit_ionq"]
+nexus = ["qnexus", "pytket", "guppylang"]
 
 [tool.poe.tasks]
 test = "pytest"

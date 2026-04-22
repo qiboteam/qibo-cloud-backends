@@ -62,3 +62,20 @@ This backend supports IonQ as provider, namely the ``qibo`` circuits are loaded 
 .. autoclass:: qibo_cloud_backends.ionq_client.IonQClientBackend
     :members:
     :member-order: bysource
+
+
+Nexus Cloud Backend
+^^^^^^^^^^^^^^^^^^^
+
+This backend submits Qibo circuits through Quantinuum Nexus. Install it with
+the optional ``nexus`` extra and configure the desired target using the
+``platform`` argument, for example ``"hseries:H2-1LE"``.
+
+.. note::
+   Importing the package does not trigger Nexus authentication. Authentication
+   and project resolution happen lazily on the first execution or estimation
+   call.
+
+.. autoclass:: qibo_cloud_backends.nexus_client.NexusClientBackend
+    :members:
+    :member-order: bysource

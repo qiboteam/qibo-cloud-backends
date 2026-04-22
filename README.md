@@ -20,6 +20,12 @@ The qibo-client-backends package can be installed through pip:
    pip install qibo-cloud-backends
 ```
 
+To enable Quantinuum Nexus support, install the optional `nexus` extra:
+
+```bash
+   pip install qibo-cloud-backends[nexus]
+```
+
 ## Quickstart
 
 Once installed, the plugin allows for setting and using the new backends in Qibo.
@@ -47,6 +53,19 @@ or, in order to run on one of the chips hosted in `ibm-q`, e.g. `ibm_kyiv`:
 
 ```python
    qibo.set_backend("qibo-cloud-backends", client="qiskit-client", token="your_token", platform="ibm_kyiv")
+   result = circuit()
+   print(result.frequencies())
+```
+
+To run through Quantinuum Nexus:
+
+```python
+   qibo.set_backend(
+       "qibo-cloud-backends",
+       client="nexus-client",
+       platform="hseries:H2-1LE",
+       project="your-project",
+   )
    result = circuit()
    print(result.frequencies())
 ```
