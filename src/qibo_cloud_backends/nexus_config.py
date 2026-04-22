@@ -116,8 +116,18 @@ def _build_helios_backend_config(
             emulator_options.setdefault("n_qubits", int(n_qubits))
 
         if _supports_parameter(helios_config_cls, "emulator_config"):
-            emulator_config = helios_emulator_cls(**emulator_options)
-            config_options: dict[str, Any] = {"emulator_config": emulator_config}
+            # Split options: keys accepted by HeliosEmulatorConfig go there;
+            # any remaining keys (e.g. attempt_batching, max_batch_cost) belong on HeliosConfig.
+            emulator_only = {
+                k: v for k, v in emulator_options.items()
+                if _supports_parameter(helios_emulator_cls, k)
+            }
+            helios_level = {
+                k: v for k, v in emulator_options.items()
+                if not _supports_parameter(helios_emulator_cls, k)
+            }
+            emulator_config = helios_emulator_cls(**emulator_only)
+            config_options: dict[str, Any] = {"emulator_config": emulator_config, **helios_level}
             if max_cost_value is not None:
                 config_options["max_cost"] = max_cost_value
             return _call_named_constructor(helios_config_cls, name=name, **config_options)
