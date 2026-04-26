@@ -14,7 +14,7 @@ from qibo.backends import NumpyBackend
 from qibo.models import Circuit
 
 from .nexus_auth import authenticate, ensure_project
-from .nexus_config import NexusBackendConfig, build_nexus_backend_config, parse_platform
+from .nexus_config import NexusBackendConfig, build_nexus_backend_config
 from .nexus_errors import (
     NexusBackendError,
     UnsupportedExecutionError,
@@ -575,9 +575,8 @@ class NexusClientBackend(NumpyBackend):
         **backend_options: Any,
     ) -> None:
         super().__init__()
+        self.name = "nexus-client"
         _ensure_nexus_dependencies()
-        self.platform = platform
-        self.project = project
 
         self.config: NexusBackendConfig = NexusBackendConfig(
             platform=platform,
