@@ -11,7 +11,9 @@ from qibo_cloud_backends.nexus_errors import UnsupportedExecutionError
 from qibo_cloud_backends.nexus_translation import TranslationMetadata
 
 
-def make_measured_circuit(nqubits: int = 1, measured_qubits: tuple[int, ...] | None = None) -> Circuit:
+def make_measured_circuit(
+    nqubits: int = 1, measured_qubits: tuple[int, ...] | None = None
+) -> Circuit:
     circuit = Circuit(nqubits)
     targets = measured_qubits if measured_qubits is not None else tuple(range(nqubits))
     circuit.add(gates.M(*targets))
@@ -22,8 +24,12 @@ def make_measured_circuit(nqubits: int = 1, measured_qubits: tuple[int, ...] | N
 def backend(monkeypatch: pytest.MonkeyPatch) -> backend_mod.NexusClientBackend:
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
-    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
-    monkeypatch.setattr(backend_mod, "build_nexus_backend_config", lambda cfg: "backend-config")
+    monkeypatch.setattr(
+        backend_mod, "ensure_project", lambda project_name: "project-ref"
+    )
+    monkeypatch.setattr(
+        backend_mod, "build_nexus_backend_config", lambda cfg: "backend-config"
+    )
     monkeypatch.setattr(backend_mod, "_import_qnexus", lambda: types.SimpleNamespace())
     return backend_mod.NexusClientBackend(
         platform="hseries:H2-1LE",
@@ -39,7 +45,9 @@ def test_execute_circuit_contract_shape(
 
     def fake_upload(self, circuit, *, parameters=None, sequence_idx=0):
         calls["upload"] = {"parameters": parameters, "sequence_idx": sequence_idx}
-        return "program-ref", TranslationMetadata(measured_qubits=[0, 1], nqubits=2, qasm="q")
+        return "program-ref", TranslationMetadata(
+            measured_qubits=[0, 1], nqubits=2, qasm="q"
+        )
 
     def fake_run_compile_execute(**kwargs):
         calls["run"] = kwargs
@@ -49,7 +57,9 @@ def test_execute_circuit_contract_shape(
         calls["map"] = kwargs
         return {"kind": "MeasurementOutcomes", "nshots": kwargs["nshots"]}
 
-    monkeypatch.setattr(backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload)
+    monkeypatch.setattr(
+        backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload
+    )
     monkeypatch.setattr(backend_mod, "run_compile_execute", fake_run_compile_execute)
     monkeypatch.setattr(backend_mod, "map_nexus_result_to_qibo", fake_map)
 
@@ -122,12 +132,16 @@ def test_execute_circuits_cardinality_and_order(
         map_calls.append(kwargs)
         return f"mapped-{kwargs['execution_result_ref']}"
 
-    monkeypatch.setattr(backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload)
+    monkeypatch.setattr(
+        backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload
+    )
     monkeypatch.setattr(backend_mod, "run_compile_execute", fake_run_compile_execute)
     monkeypatch.setattr(backend_mod, "map_nexus_result_to_qibo", fake_map)
 
     circuits = [make_measured_circuit(1), make_measured_circuit(1)]
-    result = backend.execute_circuits(circuits, nshots=[10, 20], parameters_list=[["a"], ["b"]])
+    result = backend.execute_circuits(
+        circuits, nshots=[10, 20], parameters_list=[["a"], ["b"]]
+    )
 
     assert result == ["mapped-execution-item-0", "mapped-execution-item-1"]
     assert upload_calls == [
@@ -145,7 +159,9 @@ def test_execute_circuits_nshots_cardinality_mismatch(
             measured_qubits=[0], nqubits=1, qasm="q"
         )
 
-    monkeypatch.setattr(backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload)
+    monkeypatch.setattr(
+        backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload
+    )
 
     circuits = [make_measured_circuit(1), make_measured_circuit(1)]
     with pytest.raises(ValueError, match="nshots cardinality mismatch"):
@@ -162,7 +178,9 @@ def test_estimate_circuit_contract_shape(
 
     def fake_upload(self, circuit, *, parameters=None, sequence_idx=0):
         calls["upload"] = {"parameters": parameters, "sequence_idx": sequence_idx}
-        return "program-ref", TranslationMetadata(measured_qubits=[0, 1], nqubits=2, qasm="q")
+        return "program-ref", TranslationMetadata(
+            measured_qubits=[0, 1], nqubits=2, qasm="q"
+        )
 
     def fake_prepare(**kwargs):
         calls["prepare"] = kwargs
@@ -191,13 +209,17 @@ def test_estimate_circuit_contract_shape(
             ],
         )
 
-    monkeypatch.setattr(backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload)
+    monkeypatch.setattr(
+        backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload
+    )
     monkeypatch.setattr(backend_mod, "_prepare_compiled_programs", fake_prepare)
     monkeypatch.setattr(backend_mod, "_estimate_prepared_compilation", fake_estimate)
     monkeypatch.setattr(
         backend_mod,
         "_import_qnexus",
-        lambda: types.SimpleNamespace(circuits=types.SimpleNamespace(cost=lambda *a, **k: None)),
+        lambda: types.SimpleNamespace(
+            circuits=types.SimpleNamespace(cost=lambda *a, **k: None)
+        ),
     )
 
     circuit = make_measured_circuit(1)
@@ -249,17 +271,23 @@ def test_estimate_circuits_batch_contract_shape(
             ],
         )
 
-    monkeypatch.setattr(backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload)
+    monkeypatch.setattr(
+        backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload
+    )
     monkeypatch.setattr(backend_mod, "_prepare_compiled_programs", fake_prepare)
     monkeypatch.setattr(backend_mod, "_estimate_prepared_compilation", fake_estimate)
     monkeypatch.setattr(
         backend_mod,
         "_import_qnexus",
-        lambda: types.SimpleNamespace(circuits=types.SimpleNamespace(cost=lambda *a, **k: None)),
+        lambda: types.SimpleNamespace(
+            circuits=types.SimpleNamespace(cost=lambda *a, **k: None)
+        ),
     )
 
     circuits = [make_measured_circuit(1), make_measured_circuit(1)]
-    estimate = backend.estimate_circuits(circuits, nshots=[10, 20], parameters_list=[["a"], ["b"]])
+    estimate = backend.estimate_circuits(
+        circuits, nshots=[10, 20], parameters_list=[["a"], ["b"]]
+    )
 
     assert estimate.total_hqcs == 5.0
     assert [item.hqcs for item in estimate.items] == [2.0, 3.0]
@@ -269,11 +297,17 @@ def test_estimate_circuits_batch_contract_shape(
     ]
 
 
-def test_estimate_circuits_non_batch_aggregates_results(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_estimate_circuits_non_batch_aggregates_results(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
-    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
-    monkeypatch.setattr(backend_mod, "build_nexus_backend_config", lambda cfg: "backend-config")
+    monkeypatch.setattr(
+        backend_mod, "ensure_project", lambda project_name: "project-ref"
+    )
+    monkeypatch.setattr(
+        backend_mod, "build_nexus_backend_config", lambda cfg: "backend-config"
+    )
 
     backend = backend_mod.NexusClientBackend(
         platform="hseries:H2-1LE",
@@ -317,17 +351,23 @@ def test_estimate_circuits_non_batch_aggregates_results(monkeypatch: pytest.Monk
             ],
         )
 
-    monkeypatch.setattr(backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload)
+    monkeypatch.setattr(
+        backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload
+    )
     monkeypatch.setattr(backend_mod, "_prepare_compiled_programs", fake_prepare)
     monkeypatch.setattr(backend_mod, "_estimate_prepared_compilation", fake_estimate)
     monkeypatch.setattr(
         backend_mod,
         "_import_qnexus",
-        lambda: types.SimpleNamespace(circuits=types.SimpleNamespace(cost=lambda *a, **k: None)),
+        lambda: types.SimpleNamespace(
+            circuits=types.SimpleNamespace(cost=lambda *a, **k: None)
+        ),
     )
 
     circuits = [make_measured_circuit(1), make_measured_circuit(1)]
-    estimate = backend.estimate_circuits(circuits, nshots=[10, 20], parameters_list=[["a"], ["b"]])
+    estimate = backend.estimate_circuits(
+        circuits, nshots=[10, 20], parameters_list=[["a"], ["b"]]
+    )
 
     assert estimate.batch_mode is False
     assert estimate.total_hqcs == 3.0
@@ -357,23 +397,35 @@ def test_unsupported_execution_modes(backend: backend_mod.NexusClientBackend) ->
 def test_platform_is_accepted(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
-    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
-    monkeypatch.setattr(backend_mod, "build_nexus_backend_config", lambda cfg: "backend-config")
+    monkeypatch.setattr(
+        backend_mod, "ensure_project", lambda project_name: "project-ref"
+    )
+    monkeypatch.setattr(
+        backend_mod, "build_nexus_backend_config", lambda cfg: "backend-config"
+    )
     backend = backend_mod.NexusClientBackend(platform="hseries:H2-1LE", project="proj")
     assert backend.config.platform == "hseries:H2-1LE"
 
 
-def test_execute_circuit_contract_shape_aer_platform(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_execute_circuit_contract_shape_aer_platform(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
-    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
-    monkeypatch.setattr(backend_mod, "build_nexus_backend_config", lambda cfg: "aer-backend-config")
+    monkeypatch.setattr(
+        backend_mod, "ensure_project", lambda project_name: "project-ref"
+    )
+    monkeypatch.setattr(
+        backend_mod, "build_nexus_backend_config", lambda cfg: "aer-backend-config"
+    )
 
     calls: dict[str, object] = {}
 
     def fake_upload(self, circuit, *, parameters=None, sequence_idx=0):
         calls["upload"] = {"parameters": parameters, "sequence_idx": sequence_idx}
-        return "program-ref", TranslationMetadata(measured_qubits=[0, 1], nqubits=2, qasm="q")
+        return "program-ref", TranslationMetadata(
+            measured_qubits=[0, 1], nqubits=2, qasm="q"
+        )
 
     def fake_run_compile_execute(**kwargs):
         calls["run"] = kwargs
@@ -383,7 +435,9 @@ def test_execute_circuit_contract_shape_aer_platform(monkeypatch: pytest.MonkeyP
         calls["map"] = kwargs
         return {"kind": "MeasurementOutcomes", "nshots": kwargs["nshots"]}
 
-    monkeypatch.setattr(backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload)
+    monkeypatch.setattr(
+        backend_mod.NexusClientBackend, "_upload_translated_program", fake_upload
+    )
     monkeypatch.setattr(backend_mod, "run_compile_execute", fake_run_compile_execute)
     monkeypatch.setattr(backend_mod, "map_nexus_result_to_qibo", fake_map)
 
@@ -404,7 +458,9 @@ def test_execute_circuit_contract_shape_aer_platform(monkeypatch: pytest.MonkeyP
     assert calls["map"]["execution_result_ref"] == "execution-item"
 
 
-def test_constructor_is_lazy_and_project_defaults_none(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_constructor_is_lazy_and_project_defaults_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     calls = {"auth": 0, "project": 0, "config": 0}
 
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
@@ -416,12 +472,14 @@ def test_constructor_is_lazy_and_project_defaults_none(monkeypatch: pytest.Monke
     monkeypatch.setattr(
         backend_mod,
         "ensure_project",
-        lambda project_name: calls.__setitem__("project", calls["project"] + 1) or project_name,
+        lambda project_name: calls.__setitem__("project", calls["project"] + 1)
+        or project_name,
     )
     monkeypatch.setattr(
         backend_mod,
         "build_nexus_backend_config",
-        lambda cfg: calls.__setitem__("config", calls["config"] + 1) or "backend-config",
+        lambda cfg: calls.__setitem__("config", calls["config"] + 1)
+        or "backend-config",
     )
 
     backend = backend_mod.NexusClientBackend(platform="hseries:H2-1LE")
@@ -442,12 +500,14 @@ def test_ensure_connected_is_cached(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         backend_mod,
         "ensure_project",
-        lambda project_name: calls.__setitem__("project", calls["project"] + 1) or "project-ref",
+        lambda project_name: calls.__setitem__("project", calls["project"] + 1)
+        or "project-ref",
     )
     monkeypatch.setattr(
         backend_mod,
         "build_nexus_backend_config",
-        lambda cfg: calls.__setitem__("config", calls["config"] + 1) or "backend-config",
+        lambda cfg: calls.__setitem__("config", calls["config"] + 1)
+        or "backend-config",
     )
 
     backend = backend_mod.NexusClientBackend(platform="hseries:H2-1LE", project="proj")
@@ -460,7 +520,9 @@ def test_ensure_connected_is_cached(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_execute_circuit_helios_uses_hugr_path(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
-    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
+    monkeypatch.setattr(
+        backend_mod, "ensure_project", lambda project_name: "project-ref"
+    )
 
     build_calls: list[dict[str, object]] = []
     monkeypatch.setattr(
@@ -488,15 +550,21 @@ def test_execute_circuit_helios_uses_hugr_path(monkeypatch: pytest.MonkeyPatch) 
                 {"uploaded": (hugr_package, name, project)}
             )
             or "hugr-ref",
-            cost_confidence=lambda *, programs, n_shots, **kw: calls.update({"cost": (programs, n_shots)}) or [(1.25, 84.0)],
+            cost_confidence=lambda *, programs, n_shots, **kw: calls.update(
+                {"cost": (programs, n_shots)}
+            )
+            or [(1.25, 84.0)],
         ),
         circuits=types.SimpleNamespace(
-            upload=lambda **kwargs: (_ for _ in ()).throw(AssertionError("circuits.upload called"))
+            upload=lambda **kwargs: (_ for _ in ()).throw(
+                AssertionError("circuits.upload called")
+            )
         ),
         start_compile_job=lambda **kwargs: (_ for _ in ()).throw(
             AssertionError("start_compile_job called")
         ),
-        start_execute_job=lambda **kwargs: calls.update({"execute": kwargs}) or JobRef(),
+        start_execute_job=lambda **kwargs: calls.update({"execute": kwargs})
+        or JobRef(),
         jobs=types.SimpleNamespace(
             wait_for=lambda job, timeout: job,
             results=lambda job, allow_incomplete=False: ["helios-result"],
@@ -507,7 +575,8 @@ def test_execute_circuit_helios_uses_hugr_path(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(
         backend_mod,
         "map_helios_result_to_qibo",
-        lambda **kwargs: calls.update({"map": kwargs}) or {"kind": "MeasurementOutcomes"},
+        lambda **kwargs: calls.update({"map": kwargs})
+        or {"kind": "MeasurementOutcomes"},
     )
 
     backend = backend_mod.NexusClientBackend(
@@ -527,11 +596,17 @@ def test_execute_circuit_helios_uses_hugr_path(monkeypatch: pytest.MonkeyPatch) 
     assert calls["map"]["execution_result_ref"] == "helios-result"
 
 
-def test_estimate_circuit_helios_uses_hugr_cost(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_estimate_circuit_helios_uses_hugr_cost(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
-    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
-    monkeypatch.setattr(backend_mod, "build_nexus_backend_config", lambda cfg, **kwargs: None)
+    monkeypatch.setattr(
+        backend_mod, "ensure_project", lambda project_name: "project-ref"
+    )
+    monkeypatch.setattr(
+        backend_mod, "build_nexus_backend_config", lambda cfg, **kwargs: None
+    )
     monkeypatch.setattr(
         backend_mod,
         "build_helios_hugr_package",
@@ -545,10 +620,15 @@ def test_estimate_circuit_helios_uses_hugr_cost(monkeypatch: pytest.MonkeyPatch)
     qnx = types.SimpleNamespace(
         hugr=types.SimpleNamespace(
             upload=lambda *, hugr_package, name, project: "hugr-ref",
-            cost_confidence=lambda *, programs, n_shots, **kw: calls.update({"cost": (programs, n_shots)}) or [(2.5, 84.0)],
+            cost_confidence=lambda *, programs, n_shots, **kw: calls.update(
+                {"cost": (programs, n_shots)}
+            )
+            or [(2.5, 84.0)],
         ),
         circuits=types.SimpleNamespace(
-            upload=lambda **kwargs: (_ for _ in ()).throw(AssertionError("circuits.upload called"))
+            upload=lambda **kwargs: (_ for _ in ()).throw(
+                AssertionError("circuits.upload called")
+            )
         ),
         start_compile_job=lambda **kwargs: (_ for _ in ()).throw(
             AssertionError("start_compile_job called")
@@ -573,8 +653,12 @@ def test_estimate_circuits_helios_submits_single_batch_cost_call(
 ) -> None:
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
-    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
-    monkeypatch.setattr(backend_mod, "build_nexus_backend_config", lambda cfg, **kwargs: None)
+    monkeypatch.setattr(
+        backend_mod, "ensure_project", lambda project_name: "project-ref"
+    )
+    monkeypatch.setattr(
+        backend_mod, "build_nexus_backend_config", lambda cfg, **kwargs: None
+    )
     monkeypatch.setattr(
         backend_mod,
         "build_helios_hugr_package",
@@ -590,10 +674,13 @@ def test_estimate_circuits_helios_submits_single_batch_cost_call(
             upload=lambda *, hugr_package, name, project: f"hugr-ref-{name}",
             cost_confidence=lambda *, programs, n_shots, **kw: cost_calls.append(
                 {"programs": list(programs), "n_shots": list(n_shots)}
-            ) or [(1.5, 84.0), (2.5, 84.0)],
+            )
+            or [(1.5, 84.0), (2.5, 84.0)],
         ),
         circuits=types.SimpleNamespace(
-            upload=lambda **kwargs: (_ for _ in ()).throw(AssertionError("circuits.upload called"))
+            upload=lambda **kwargs: (_ for _ in ()).throw(
+                AssertionError("circuits.upload called")
+            )
         ),
         start_compile_job=lambda **kwargs: (_ for _ in ()).throw(
             AssertionError("start_compile_job called")
@@ -633,13 +720,16 @@ def test_execute_circuits_helios_emulator_propagates_per_program_limits(
     """
     monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
-    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
+    monkeypatch.setattr(
+        backend_mod, "ensure_project", lambda project_name: "project-ref"
+    )
 
     build_calls: list[dict[str, object]] = []
     monkeypatch.setattr(
         backend_mod,
         "build_nexus_backend_config",
-        lambda cfg, **kwargs: build_calls.append({"cfg": cfg, **kwargs}) or "helios-backend-config",
+        lambda cfg, **kwargs: build_calls.append({"cfg": cfg, **kwargs})
+        or "helios-backend-config",
     )
 
     metadata_by_idx = [
@@ -668,15 +758,19 @@ def test_execute_circuits_helios_emulator_propagates_per_program_limits(
                     "cost_n_shots": list(n_shots),
                     "cost_system_name": kw.get("system_name"),
                 }
-            ) or [(1.5, 10.0), (4.25, 12.0)],
+            )
+            or [(1.5, 10.0), (4.25, 12.0)],
         ),
         circuits=types.SimpleNamespace(
-            upload=lambda **kwargs: (_ for _ in ()).throw(AssertionError("circuits.upload called"))
+            upload=lambda **kwargs: (_ for _ in ()).throw(
+                AssertionError("circuits.upload called")
+            )
         ),
         start_compile_job=lambda **kwargs: (_ for _ in ()).throw(
             AssertionError("start_compile_job called")
         ),
-        start_execute_job=lambda **kwargs: calls.update({"execute": kwargs}) or JobRef(),
+        start_execute_job=lambda **kwargs: calls.update({"execute": kwargs})
+        or JobRef(),
         jobs=types.SimpleNamespace(
             wait_for=lambda job, timeout: job,
             results=lambda job, allow_incomplete=False: ["res-0", "res-1"],

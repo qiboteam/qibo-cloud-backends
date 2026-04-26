@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import linecache
 from collections import Counter
 from itertools import repeat
-import linecache
 from typing import Any, Iterable
 
 import numpy as np
@@ -30,6 +30,7 @@ def _import_guppy() -> Any:
 def _prepare_pytket_for_guppy(pytket_circuit: Any) -> Any:
     try:
         from pytket.circuit import OpType
+
         # pylint: disable=no-name-in-module
         from pytket.passes import AutoRebase, DecomposeBoxes
     except Exception as exc:  # pragma: no cover - import environment specific
@@ -70,7 +71,9 @@ def _build_entrypoint_source(
 
     measured_qubits = set(metadata.measured_qubits)
     for idx, qubit in enumerate(metadata.measured_qubits):
-        lines.append(f'    result("{_MEASUREMENT_REGISTER}[{idx}]", measure({qubit_names[qubit]}))')
+        lines.append(
+            f'    result("{_MEASUREMENT_REGISTER}[{idx}]", measure({qubit_names[qubit]}))'
+        )
     for idx, name in enumerate(qubit_names):
         if idx not in measured_qubits:
             lines.append(f"    discard({name})")
@@ -98,7 +101,9 @@ def build_helios_hugr_package(
             "loaded_pytket", pytket_circuit, use_arrays=False
         )
     except Exception as exc:
-        raise NexusBackendError(f"Failed to load pytket circuit into Guppy: {exc}") from exc
+        raise NexusBackendError(
+            f"Failed to load pytket circuit into Guppy: {exc}"
+        ) from exc
 
     namespace = {"guppy": guppy, "loaded_pytket": loaded_pytket}
     source = _build_entrypoint_source(
@@ -116,13 +121,17 @@ def build_helios_hugr_package(
     try:
         exec(compile(source, source_filename, "exec"), namespace)
     except Exception as exc:
-        raise NexusBackendError(f"Failed to build Helios Guppy entrypoint: {exc}") from exc
+        raise NexusBackendError(
+            f"Failed to build Helios Guppy entrypoint: {exc}"
+        ) from exc
 
     entrypoint = namespace[entrypoint_name]
     try:
         return entrypoint.compile(), metadata
     except Exception as exc:
-        raise NexusBackendError(f"Failed to compile Helios HUGR package: {exc}") from exc
+        raise NexusBackendError(
+            f"Failed to compile Helios HUGR package: {exc}"
+        ) from exc
 
 
 def _to_bit(value: Any) -> str:
@@ -165,7 +174,9 @@ def _extract_named_results(shot: Any) -> dict[str, Any]:
                     tag = getattr(item, "key", None)
                 value = getattr(item, "value", None)
             if tag is None:
-                raise NexusResultMappingError(f"Unsupported Helios shot entry: {item!r}")
+                raise NexusResultMappingError(
+                    f"Unsupported Helios shot entry: {item!r}"
+                )
             values[str(tag)] = value
         return values
 
@@ -186,8 +197,10 @@ def _extract_helios_counts(backend_result: Any, measured_count: int) -> Counter[
     shots = getattr(backend_result, "shots", None)
     if shots is None:
         shots = getattr(backend_result, "results", None)
-    if shots is None and isinstance(backend_result, Iterable) and not isinstance(
-        backend_result, (str, bytes, dict)
+    if (
+        shots is None
+        and isinstance(backend_result, Iterable)
+        and not isinstance(backend_result, (str, bytes, dict))
     ):
         shots = backend_result
     if shots is None:
@@ -235,7 +248,9 @@ def map_helios_result_to_qibo(
     try:
         from qibo.result import MeasurementOutcomes
     except Exception as exc:  # pragma: no cover - import environment specific
-        raise NexusResultMappingError("qibo is required to build result objects.") from exc
+        raise NexusResultMappingError(
+            "qibo is required to build result objects."
+        ) from exc
 
     measurements = list(circuit.measurements)
     total_shots = int(sum(frequencies.values()))

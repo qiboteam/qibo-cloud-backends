@@ -118,7 +118,9 @@ def map_nexus_result_to_qibo(
     try:
         from qibo.result import MeasurementOutcomes
     except Exception as exc:  # pragma: no cover - import environment specific
-        raise NexusResultMappingError("qibo is required to build result objects.") from exc
+        raise NexusResultMappingError(
+            "qibo is required to build result objects."
+        ) from exc
 
     measurements = list(circuit.measurements)
     total_shots = int(sum(frequencies.values()))

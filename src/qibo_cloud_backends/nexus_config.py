@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import inspect
 import logging
 from dataclasses import dataclass, field
-import inspect
 from typing import Any
 
 LOGGER = logging.getLogger(__name__)
@@ -119,11 +119,13 @@ def _build_helios_backend_config(
             # emulator; any remaining user-supplied options (e.g. attempt_batching
             # for real Helios-1) belong on HeliosConfig.
             emulator_only = {
-                k: v for k, v in emulator_options.items()
+                k: v
+                for k, v in emulator_options.items()
                 if _supports_parameter(helios_emulator_cls, k)
             }
             helios_level = {
-                k: v for k, v in emulator_options.items()
+                k: v
+                for k, v in emulator_options.items()
                 if not _supports_parameter(helios_emulator_cls, k)
             }
             emulator_config = helios_emulator_cls(**emulator_only)
@@ -134,7 +136,9 @@ def _build_helios_backend_config(
                 **helios_level,
             )
 
-        return _call_named_constructor(helios_emulator_cls, name=name, **emulator_options)
+        return _call_named_constructor(
+            helios_emulator_cls, name=name, **emulator_options
+        )
 
     return _call_named_constructor(helios_config_cls, name=name, **options)
 

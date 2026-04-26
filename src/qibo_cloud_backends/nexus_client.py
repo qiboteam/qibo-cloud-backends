@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
-from importlib import import_module
 import re
 import warnings
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
+from importlib import import_module
 from typing import Any, Iterable
 
 from qibo.backends import NumpyBackend
@@ -230,7 +230,10 @@ def _prepare_compiled_programs(
 
 
 def _supports_hqc_estimation(backend_config: Any) -> bool:
-    return _resolve_estimate_syntax_checker(backend_config, warn_for_emulator=False) is not None
+    return (
+        _resolve_estimate_syntax_checker(backend_config, warn_for_emulator=False)
+        is not None
+    )
 
 
 def _resolve_estimate_syntax_checker(
@@ -337,7 +340,9 @@ def _estimate_prepared_compilation(
             hqcs=hqcs,
             compile_job_id=prepared.compile_job_id,
         )
-        for idx, (nshots, hqcs) in enumerate(zip(prepared.shot_values, normalized_costs))
+        for idx, (nshots, hqcs) in enumerate(
+            zip(prepared.shot_values, normalized_costs)
+        )
     ]
     return ExecutionEstimate(
         platform=platform,
@@ -368,14 +373,23 @@ def _estimate_helios_cost(
             system_name=_HELIOS_COST_SYSTEM_NAME,
         )
     except Exception as exc:  # noqa: BLE001
-        raise NexusBackendError(f"Failed to estimate Helios execution cost: {exc}") from exc
+        raise NexusBackendError(
+            f"Failed to estimate Helios execution cost: {exc}"
+        ) from exc
     try:
         items = list(results)
-        if not items or not isinstance(items[0], tuple) or len(items[0]) < 1 or items[0][0] is None:
+        if (
+            not items
+            or not isinstance(items[0], tuple)
+            or len(items[0]) < 1
+            or items[0][0] is None
+        ):
             raise ValueError(f"unexpected result shape: {items!r}")
         return float(items[0][0])
     except (TypeError, ValueError) as exc:
-        raise NexusBackendError(f"Invalid Helios cost estimate returned: {results!r}") from exc
+        raise NexusBackendError(
+            f"Invalid Helios cost estimate returned: {results!r}"
+        ) from exc
 
 
 def _estimate_helios_costs_batch(
@@ -393,7 +407,9 @@ def _estimate_helios_costs_batch(
             system_name=_HELIOS_COST_SYSTEM_NAME,
         )
     except Exception as exc:  # noqa: BLE001
-        raise NexusBackendError(f"Failed to estimate Helios execution costs: {exc}") from exc
+        raise NexusBackendError(
+            f"Failed to estimate Helios execution costs: {exc}"
+        ) from exc
     try:
         items = list(results)
     except (TypeError, ValueError) as exc:
@@ -678,7 +694,9 @@ class NexusClientBackend(NumpyBackend):
     ) -> tuple[Any, TranslationMetadata]:
         self._ensure_connected()
         qnx = _import_qnexus()
-        upload_name = _job_name(self.config.job_name_prefix, "program", str(sequence_idx))
+        upload_name = _job_name(
+            self.config.job_name_prefix, "program", str(sequence_idx)
+        )
         if self.config.platform_family == "helios":
             hugr_package, metadata = build_helios_hugr_package(
                 circuit,
@@ -692,10 +710,14 @@ class NexusClientBackend(NumpyBackend):
                     project=self._project_ref,
                 )
             except Exception as exc:  # noqa: BLE001
-                raise NexusBackendError(f"Failed to upload Helios HUGR to Nexus: {exc}") from exc
+                raise NexusBackendError(
+                    f"Failed to upload Helios HUGR to Nexus: {exc}"
+                ) from exc
             return program_ref, metadata
 
-        pytket_circuit, metadata = translate_qibo_to_pytket(circuit, parameters=parameters)
+        pytket_circuit, metadata = translate_qibo_to_pytket(
+            circuit, parameters=parameters
+        )
         try:
             circuit_ref = qnx.circuits.upload(
                 circuit=pytket_circuit,
@@ -703,7 +725,9 @@ class NexusClientBackend(NumpyBackend):
                 project=self._project_ref,
             )
         except Exception as exc:  # noqa: BLE001
-            raise NexusBackendError(f"Failed to upload circuit to Nexus: {exc}") from exc
+            raise NexusBackendError(
+                f"Failed to upload circuit to Nexus: {exc}"
+            ) from exc
 
         return circuit_ref, metadata
 
@@ -1088,7 +1112,9 @@ class NexusClientBackend(NumpyBackend):
                 shot_values = [int(nshots)] * len(circuits)
 
             items: list[EstimateItem] = []
-            for idx, (circuit, shots, params) in enumerate(zip(circuits, shot_values, parameters_list)):
+            for idx, (circuit, shots, params) in enumerate(
+                zip(circuits, shot_values, parameters_list)
+            ):
                 self._assert_supported_execution(circuit, None)
                 circuit_ref, _ = self._upload_translated_program(
                     circuit,
@@ -1161,12 +1187,16 @@ class NexusClientBackend(NumpyBackend):
             job_name_prefix=self.config.job_name_prefix,
         )
 
-    def execute_circuit_repeated(self, circuit: Circuit, nshots: int, repetitions: int) -> Any:
+    def execute_circuit_repeated(
+        self, circuit: Circuit, nshots: int, repetitions: int
+    ) -> Any:
         raise UnsupportedExecutionError(
             "execute_circuit_repeated is not supported for the remote Nexus backend."
         )
 
-    def execute_distributed_circuit(self, circuit: Circuit, initial_state: Any = None) -> Any:
+    def execute_distributed_circuit(
+        self, circuit: Circuit, initial_state: Any = None
+    ) -> Any:
         raise UnsupportedExecutionError(
             "Distributed execution is not supported for the remote Nexus backend."
         )

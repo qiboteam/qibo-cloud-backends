@@ -16,7 +16,9 @@ def authenticate(*, credential_login: bool | None) -> None:
     try:
         import qnexus as qnx
     except Exception as exc:  # pragma: no cover - import environment specific
-        raise NexusAuthError("qnexus is not installed. Cannot authenticate to Nexus.") from exc
+        raise NexusAuthError(
+            "qnexus is not installed. Cannot authenticate to Nexus."
+        ) from exc
 
     try:
         if credential_login:
@@ -44,7 +46,9 @@ def ensure_project(project_name: str | None) -> Any:
     try:
         import qnexus as qnx
     except Exception as exc:  # pragma: no cover - import environment specific
-        raise NexusAuthError("qnexus is not installed. Cannot create/get project.") from exc
+        raise NexusAuthError(
+            "qnexus is not installed. Cannot create/get project."
+        ) from exc
 
     try:
         get_or_create = qnx.projects.get_or_create
@@ -53,4 +57,6 @@ def ensure_project(project_name: str | None) -> Any:
         except TypeError:
             return get_or_create(project_name)
     except Exception as exc:
-        raise NexusAuthError(f"Failed to initialize Nexus project '{project_name}': {exc}") from exc
+        raise NexusAuthError(
+            f"Failed to initialize Nexus project '{project_name}': {exc}"
+        ) from exc

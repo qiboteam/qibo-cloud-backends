@@ -17,7 +17,9 @@ def test_build_entrypoint_source_preserves_measurement_order() -> None:
     source = _build_entrypoint_source(
         loaded_name="loaded_pytket",
         entrypoint_name="helios_entrypoint",
-        metadata=TranslationMetadata(measured_qubits=[2, 0], nqubits=3, qasm="OPENQASM"),
+        metadata=TranslationMetadata(
+            measured_qubits=[2, 0], nqubits=3, qasm="OPENQASM"
+        ),
     )
 
     assert 'result("m[0]", measure(q2))' in source
@@ -88,7 +90,9 @@ def test_build_helios_hugr_package_loads_pytket_with_rebasing(
     monkeypatch.setitem(__import__("sys").modules, "pytket.circuit", pytket_circuit_mod)
     monkeypatch.setitem(__import__("sys").modules, "pytket.passes", pytket_passes_mod)
     monkeypatch.setitem(__import__("sys").modules, "guppylang", guppy_mod)
-    monkeypatch.setitem(__import__("sys").modules, "guppylang.std.builtins", builtins_mod)
+    monkeypatch.setitem(
+        __import__("sys").modules, "guppylang.std.builtins", builtins_mod
+    )
     monkeypatch.setitem(__import__("sys").modules, "guppylang.std.quantum", quantum_mod)
 
     circuit = Circuit(1)

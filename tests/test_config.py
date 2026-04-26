@@ -80,7 +80,9 @@ def test_build_helios_emulator_config(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setitem(__import__("sys").modules, "qnexus", fake_qnx)
 
-    cfg = NexusBackendConfig(platform="helios:Helios-1", backend_options={"emulator": True})
+    cfg = NexusBackendConfig(
+        platform="helios:Helios-1", backend_options={"emulator": True}
+    )
     concrete = build_nexus_backend_config(cfg)
     assert concrete.kind == "emulator"
     assert concrete.hardware_name == "Helios-1"
@@ -131,7 +133,15 @@ def test_build_helios_emulator_config_ignores_helios_config_kwargs(
             # does NOT accept attempt_batching or max_batch_cost
 
     class HeliosConfig:
-        def __init__(self, *, system_name: str, emulator_config=None, attempt_batching=False, max_batch_cost=2000.0, **kwargs):
+        def __init__(
+            self,
+            *,
+            system_name: str,
+            emulator_config=None,
+            attempt_batching=False,
+            max_batch_cost=2000.0,
+            **kwargs,
+        ):
             self.system_name = system_name
             self.emulator_config = emulator_config
             self.attempt_batching = attempt_batching
@@ -146,7 +156,12 @@ def test_build_helios_emulator_config_ignores_helios_config_kwargs(
 
     cfg = NexusBackendConfig(
         platform="helios:Helios-1E",
-        backend_options={"emulator": True, "n_qubits": 8, "attempt_batching": True, "max_batch_cost": 99.0},
+        backend_options={
+            "emulator": True,
+            "n_qubits": 8,
+            "attempt_batching": True,
+            "max_batch_cost": 99.0,
+        },
     )
     concrete = build_nexus_backend_config(cfg)
     assert concrete.attempt_batching is True

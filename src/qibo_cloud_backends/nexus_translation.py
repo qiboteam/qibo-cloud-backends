@@ -141,7 +141,9 @@ def _strip_measurements(circuit: Circuit) -> Circuit:
     return stripped
 
 
-def prepare_qibo_circuit(circuit: Circuit, parameters: Any = None) -> tuple[Circuit, str]:
+def prepare_qibo_circuit(
+    circuit: Circuit, parameters: Any = None
+) -> tuple[Circuit, str]:
     """Run QASM preflight and return a QASM-ready circuit and QASM string."""
 
     working = circuit.copy(deep=True)
@@ -158,7 +160,9 @@ def prepare_qibo_circuit(circuit: Circuit, parameters: Any = None) -> tuple[Circ
         except TypeError:
             qasm = working.to_qasm()
     except Exception as exc:
-        raise NexusBackendError(f"Failed to export Qibo circuit to OpenQASM: {exc}") from exc
+        raise NexusBackendError(
+            f"Failed to export Qibo circuit to OpenQASM: {exc}"
+        ) from exc
 
     return working, qasm
 
@@ -173,7 +177,9 @@ def translate_qibo_to_pytket(
     try:
         from pytket.qasm import circuit_from_qasm_str
     except Exception as exc:  # pragma: no cover - import environment specific
-        raise NexusBackendError("pytket.qasm is required for QASM translation.") from exc
+        raise NexusBackendError(
+            "pytket.qasm is required for QASM translation."
+        ) from exc
 
     try:
         pytket_circuit = circuit_from_qasm_str(qasm)
@@ -216,7 +222,9 @@ def translate_qibo_to_pytket_for_helios(
     try:
         from pytket.qasm import circuit_from_qasm_str
     except Exception as exc:  # pragma: no cover - import environment specific
-        raise NexusBackendError("pytket.qasm is required for QASM translation.") from exc
+        raise NexusBackendError(
+            "pytket.qasm is required for QASM translation."
+        ) from exc
 
     try:
         pytket_circuit = circuit_from_qasm_str(qasm)
