@@ -348,12 +348,16 @@ def _estimate_prepared_compilation(
     )
 
 
+_HELIOS_COST_SYSTEM_NAME = "Helios-1"
+# qnx.hugr.cost_confidence builds its costing job from QuantinuumConfig(device_name=f"{system_name}SC")
+# and only "Helios-1SC" exists as a syntax checker — emulator targets must still use this.
+
+
 def _estimate_helios_cost(
     *,
     qnx: Any,
     program: Any,
     nshots: int,
-    platform_name: str,
     project: Any = None,
 ) -> float:
     try:
@@ -361,7 +365,7 @@ def _estimate_helios_cost(
             programs=[program],
             n_shots=[int(nshots)],
             project=project,
-            system_name=platform_name,
+            system_name=_HELIOS_COST_SYSTEM_NAME,
         )
     except Exception as exc:  # noqa: BLE001
         raise NexusBackendError(f"Failed to estimate Helios execution cost: {exc}") from exc
@@ -379,7 +383,6 @@ def _estimate_helios_costs_batch(
     qnx: Any,
     programs: list[Any],
     n_shots: list[int],
-    platform_name: str,
     project: Any = None,
 ) -> list[float]:
     try:
@@ -387,7 +390,7 @@ def _estimate_helios_costs_batch(
             programs=programs,
             n_shots=n_shots,
             project=project,
-            system_name=platform_name,
+            system_name=_HELIOS_COST_SYSTEM_NAME,
         )
     except Exception as exc:  # noqa: BLE001
         raise NexusBackendError(f"Failed to estimate Helios execution costs: {exc}") from exc
@@ -429,6 +432,7 @@ def _execute_programs(
     platform: str,
     job_name_prefix: str | None = None,
     project: Any = None,
+    max_cost: float | list[float] | None = None,
 ) -> list[Any]:
     execute_name = _job_name(job_name_prefix, "execute", platform)
 
@@ -442,6 +446,8 @@ def _execute_programs(
         }
         if language is not None:
             execute_kwargs["language"] = language
+        if max_cost is not None:
+            execute_kwargs["max_cost"] = max_cost
         execute_job = qnx.start_execute_job(**execute_kwargs)
     except Exception as exc:  # noqa: BLE001
         raise NexusBackendError(f"Failed to submit execute job: {exc}") from exc
@@ -623,14 +629,12 @@ class NexusClientBackend(NumpyBackend):
         self,
         *,
         nqubits: int | None = None,
-        max_cost: float | None = None,
     ) -> Any:
         if self.config.platform_family != "helios":
             return self._backend_config
         return build_nexus_backend_config(
             self.config,
             n_qubits=nqubits,
-            max_cost=max_cost,
         )
 
     def _map_execution_result(
@@ -729,12 +733,10 @@ class NexusClientBackend(NumpyBackend):
                 qnx=qnx,
                 program=program_ref,
                 nshots=shots,
-                platform_name=parse_platform(self.config.platform)[1],
                 project=self._project_ref,
             )
             backend_config = self._build_execution_backend_config(
                 nqubits=metadata.nqubits,
-                max_cost=max_cost,
             )
             execution_items = _execute_programs(
                 qnx=qnx,
@@ -747,6 +749,7 @@ class NexusClientBackend(NumpyBackend):
                 platform=self.config.platform,
                 job_name_prefix=self.config.job_name_prefix,
                 project=self._project_ref,
+                max_cost=max_cost,
             )
         else:
             execution_items = run_compile_execute(
@@ -803,7 +806,6 @@ class NexusClientBackend(NumpyBackend):
                 qnx=qnx,
                 program=program_ref,
                 nshots=shots,
-                platform_name=parse_platform(self.config.platform)[1],
                 project=self._project_ref,
             )
             return ExecutionEstimate(
@@ -886,20 +888,12 @@ class NexusClientBackend(NumpyBackend):
                 qnx=qnx,
                 programs=program_refs,
                 n_shots=shot_values,
-                platform_name=parse_platform(self.config.platform)[1],
                 project=self._project_ref,
             )
-            max_batch_cost = sum(costs)
 
-            batch_cfg = replace(
-                self.config,
-                backend_options={
-                    **self.config.backend_options,
-                    "attempt_batching": True,
-                    "max_batch_cost": max_batch_cost,
-                },
+            backend_config = self._build_execution_backend_config(
+                nqubits=max(m.nqubits for m in metadata_list),
             )
-            backend_config = build_nexus_backend_config(batch_cfg)
 
             execution_items = _execute_programs(
                 qnx=qnx,
@@ -912,6 +906,7 @@ class NexusClientBackend(NumpyBackend):
                 platform=self.config.platform,
                 job_name_prefix=self.config.job_name_prefix,
                 project=self._project_ref,
+                max_cost=[float(c) for c in costs],
             )
 
             if len(execution_items) != len(circuits):
@@ -1060,7 +1055,6 @@ class NexusClientBackend(NumpyBackend):
                 qnx=qnx,
                 programs=program_refs,
                 n_shots=shot_values,
-                platform_name=parse_platform(self.config.platform)[1],
                 project=self._project_ref,
             )
 

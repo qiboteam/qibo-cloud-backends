@@ -30,6 +30,7 @@ def _import_guppy() -> Any:
 def _prepare_pytket_for_guppy(pytket_circuit: Any) -> Any:
     try:
         from pytket.circuit import OpType
+        # pylint: disable=no-name-in-module
         from pytket.passes import AutoRebase, DecomposeBoxes
     except Exception as exc:  # pragma: no cover - import environment specific
         raise NexusBackendError(
@@ -92,6 +93,7 @@ def build_helios_hugr_package(
     pytket_circuit = _prepare_pytket_for_guppy(pytket_circuit)
 
     try:
+        # pylint: disable=assignment-from-none
         loaded_pytket = guppy.load_pytket(
             "loaded_pytket", pytket_circuit, use_arrays=False
         )

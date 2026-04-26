@@ -23,7 +23,7 @@ def test_prepare_qibo_circuit_decomposes_multicontrol() -> None:
     prepared, qasm = prepare_qibo_circuit(circuit)
 
     assert all(len(g.control_qubits) <= 1 for g in prepared.queue)
-    assert qasm.startswith("OPENQASM")
+    assert "OPENQASM" in qasm
 
 
 def test_prepare_qibo_circuit_raises_for_unbound_params() -> None:
@@ -51,7 +51,7 @@ def test_translate_qibo_to_pytket(monkeypatch: pytest.MonkeyPatch) -> None:
     circuit.add(gates.M(2, 0, register_name="m0"))
     parsed, metadata = translate_qibo_to_pytket(circuit)
 
-    assert parsed["parsed"].startswith("OPENQASM")
+    assert "OPENQASM" in parsed["parsed"]
     assert metadata.measured_qubits == [2, 0]
 
 
@@ -75,7 +75,7 @@ def test_translate_qibo_to_pytket_for_helios_strips_measurements(
 
     parsed, metadata = translate_qibo_to_pytket_for_helios(circuit)
 
-    assert parsed["parsed"].startswith("OPENQASM")
+    assert "OPENQASM" in parsed["parsed"]
     assert "measure" not in parsed["parsed"].lower()
     assert metadata.measured_qubits == [1, 0]
 

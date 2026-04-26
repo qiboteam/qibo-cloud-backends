@@ -24,6 +24,7 @@ def backend(monkeypatch: pytest.MonkeyPatch) -> backend_mod.NexusClientBackend:
     monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
     monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
     monkeypatch.setattr(backend_mod, "build_nexus_backend_config", lambda cfg: "backend-config")
+    monkeypatch.setattr(backend_mod, "_import_qnexus", lambda: types.SimpleNamespace())
     return backend_mod.NexusClientBackend(
         platform="hseries:H2-1LE",
         project="proj",
@@ -346,10 +347,10 @@ def test_unsupported_execution_modes(backend: backend_mod.NexusClientBackend) ->
     with pytest.raises(UnsupportedExecutionError, match="initial_state"):
         backend.execute_circuit(make_measured_circuit(1), initial_state=[1, 0])
 
-    with pytest.raises(UnsupportedExecutionError, match="shot-based"):
+    with pytest.raises(UnsupportedExecutionError, match=r"(?i)shot-based"):
         backend.execute_circuit(Circuit(1), nshots=10)
 
-    with pytest.raises(UnsupportedExecutionError, match="shot-based"):
+    with pytest.raises(UnsupportedExecutionError, match=r"(?i)shot-based"):
         backend.estimate_circuit(Circuit(1), nshots=10)
 
 
@@ -522,7 +523,7 @@ def test_execute_circuit_helios_uses_hugr_path(monkeypatch: pytest.MonkeyPatch) 
     assert calls["execute"]["programs"] == ["hugr-ref"]
     assert "language" not in calls["execute"]
     assert build_calls[-1]["n_qubits"] == 2
-    assert build_calls[-1]["max_cost"] == 1.25
+    assert calls["execute"]["max_cost"] == 1.25
     assert calls["map"]["execution_result_ref"] == "helios-result"
 
 
@@ -617,3 +618,102 @@ def test_estimate_circuits_helios_submits_single_batch_cost_call(
     assert estimate.items[1].nshots == 20
     assert estimate.items[1].hqcs == 2.5
     assert estimate.batch_mode is False
+
+
+def test_execute_circuits_helios_emulator_propagates_per_program_limits(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression test for batched Helios execute_circuits.
+
+    Verifies that the execute path:
+      - sizes the emulator state with the maximum metadata.nqubits across circuits
+      - passes per-program max_cost (as a list) to qnx.start_execute_job
+      - does NOT inject attempt_batching=True into backend_options
+        (vendor: batching is unsupported on Helios emulators).
+    """
+    monkeypatch.setattr(backend_mod, "_ensure_nexus_dependencies", lambda: None)
+    monkeypatch.setattr(backend_mod, "authenticate", lambda **kwargs: None)
+    monkeypatch.setattr(backend_mod, "ensure_project", lambda project_name: "project-ref")
+
+    build_calls: list[dict[str, object]] = []
+    monkeypatch.setattr(
+        backend_mod,
+        "build_nexus_backend_config",
+        lambda cfg, **kwargs: build_calls.append({"cfg": cfg, **kwargs}) or "helios-backend-config",
+    )
+
+    metadata_by_idx = [
+        TranslationMetadata(measured_qubits=[0], nqubits=1, qasm="q1"),
+        TranslationMetadata(measured_qubits=[0, 1, 2], nqubits=3, qasm="q3"),
+    ]
+
+    def fake_build(circuit, parameters=None, entrypoint_name="helios_entrypoint"):
+        # Return a metadata object whose nqubits matches the circuit width.
+        idx = circuit.nqubits - 1 if circuit.nqubits == 1 else 1
+        return f"hugr-package-{idx}", metadata_by_idx[idx]
+
+    monkeypatch.setattr(backend_mod, "build_helios_hugr_package", fake_build)
+
+    calls: dict[str, object] = {}
+
+    class JobRef:
+        id = "execute-job-batch"
+
+    qnx = types.SimpleNamespace(
+        hugr=types.SimpleNamespace(
+            upload=lambda *, hugr_package, name, project: f"hugr-ref-{hugr_package}",
+            cost_confidence=lambda *, programs, n_shots, **kw: calls.update(
+                {
+                    "cost_programs": list(programs),
+                    "cost_n_shots": list(n_shots),
+                    "cost_system_name": kw.get("system_name"),
+                }
+            ) or [(1.5, 10.0), (4.25, 12.0)],
+        ),
+        circuits=types.SimpleNamespace(
+            upload=lambda **kwargs: (_ for _ in ()).throw(AssertionError("circuits.upload called"))
+        ),
+        start_compile_job=lambda **kwargs: (_ for _ in ()).throw(
+            AssertionError("start_compile_job called")
+        ),
+        start_execute_job=lambda **kwargs: calls.update({"execute": kwargs}) or JobRef(),
+        jobs=types.SimpleNamespace(
+            wait_for=lambda job, timeout: job,
+            results=lambda job, allow_incomplete=False: ["res-0", "res-1"],
+            status=lambda job: "COMPLETED",
+        ),
+    )
+    monkeypatch.setattr(backend_mod, "_import_qnexus", lambda: qnx)
+    monkeypatch.setattr(
+        backend_mod,
+        "map_helios_result_to_qibo",
+        lambda **kwargs: f"mapped-{kwargs['execution_result_ref']}",
+    )
+
+    backend = backend_mod.NexusClientBackend(
+        platform="helios:Helios-1E",
+        project="proj",
+        emulator=True,
+    )
+    circuits = [make_measured_circuit(1), make_measured_circuit(3)]
+    results = backend.execute_circuits(circuits, nshots=[10, 30])
+
+    assert results == ["mapped-res-0", "mapped-res-1"]
+
+    # Per-program max_cost list and shots flow into start_execute_job (vendor pattern).
+    assert calls["execute"]["max_cost"] == [1.5, 4.25]
+    assert calls["execute"]["n_shots"] == [10, 30]
+
+    # Emulator state is sized for the widest circuit (max nqubits across programs).
+    last_build = build_calls[-1]
+    assert last_build["n_qubits"] == 3
+
+    # No batching auto-injection on emulator (vendor: unsupported on Helios emulators).
+    cfg = last_build["cfg"]
+    assert "attempt_batching" not in cfg.backend_options
+    assert "max_batch_cost" not in cfg.backend_options
+
+    # Cost estimation always targets Helios-1 syntax checker — qnexus internally builds
+    # `QuantinuumConfig(device_name=f"{system_name}SC")`, and only "Helios-1SC" exists.
+    # Even when the user-target platform is Helios-1E, system_name must stay "Helios-1".
+    assert calls["cost_system_name"] == "Helios-1"

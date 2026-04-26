@@ -86,19 +86,22 @@ def test_build_helios_emulator_config(monkeypatch: pytest.MonkeyPatch) -> None:
     assert concrete.hardware_name == "Helios-1"
 
 
-def test_build_helios_modern_config_uses_emulator_config_and_max_cost(
+def test_build_helios_modern_config_uses_emulator_config(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """n_qubits sizes the HeliosEmulatorConfig; per-program max_cost is now
+    passed via qnx.start_execute_job (not the backend_config), so it does not
+    appear here."""
+
     class HeliosEmulatorConfig:
         def __init__(self, *, n_qubits: int, simulator: str):
             self.n_qubits = n_qubits
             self.simulator = simulator
 
     class HeliosConfig:
-        def __init__(self, *, system_name: str, emulator_config=None, max_cost=None):
+        def __init__(self, *, system_name: str, emulator_config=None):
             self.system_name = system_name
             self.emulator_config = emulator_config
-            self.max_cost = max_cost
 
     fake_qnx = types.SimpleNamespace(
         QuantinuumConfig=object,
@@ -111,9 +114,8 @@ def test_build_helios_modern_config_uses_emulator_config_and_max_cost(
         platform="helios:Helios-1E",
         backend_options={"simulator": "statevector", "emulator": True},
     )
-    concrete = build_nexus_backend_config(cfg, n_qubits=12, max_cost=3.5)
+    concrete = build_nexus_backend_config(cfg, n_qubits=12)
     assert concrete.system_name == "Helios-1E"
-    assert concrete.max_cost == 3.5
     assert concrete.emulator_config.n_qubits == 12
     assert concrete.emulator_config.simulator == "statevector"
 

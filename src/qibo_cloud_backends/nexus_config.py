@@ -97,7 +97,6 @@ def _build_helios_backend_config(
     name: str,
     options: dict[str, Any],
     n_qubits: int | None,
-    max_cost: float | None,
 ) -> Any:
     helios_config_cls = _resolve_qnexus_model(qnx, "HeliosConfig")
     helios_emulator_cls = _resolve_qnexus_model(qnx, "HeliosEmulatorConfig")
@@ -106,9 +105,6 @@ def _build_helios_backend_config(
 
     forced_emulator = options.pop("emulator", None)
     emulator_requested = _should_use_helios_emulator(name, forced_emulator)
-    max_cost_value = options.pop("max_cost", None)
-    if max_cost is not None:
-        max_cost_value = float(max_cost)
 
     if emulator_requested and helios_emulator_cls is not None:
         emulator_options = dict(options)
@@ -116,8 +112,9 @@ def _build_helios_backend_config(
             emulator_options.setdefault("n_qubits", int(n_qubits))
 
         if _supports_parameter(helios_config_cls, "emulator_config"):
-            # Split options: keys accepted by HeliosEmulatorConfig go there;
-            # any remaining keys (e.g. attempt_batching, max_batch_cost) belong on HeliosConfig.
+            # Split options: keys accepted by HeliosEmulatorConfig go on the
+            # emulator; any remaining user-supplied options (e.g. attempt_batching
+            # for real Helios-1) belong on HeliosConfig.
             emulator_only = {
                 k: v for k, v in emulator_options.items()
                 if _supports_parameter(helios_emulator_cls, k)
@@ -127,26 +124,22 @@ def _build_helios_backend_config(
                 if not _supports_parameter(helios_emulator_cls, k)
             }
             emulator_config = helios_emulator_cls(**emulator_only)
-            config_options: dict[str, Any] = {"emulator_config": emulator_config, **helios_level}
-            if max_cost_value is not None:
-                config_options["max_cost"] = max_cost_value
-            return _call_named_constructor(helios_config_cls, name=name, **config_options)
+            return _call_named_constructor(
+                helios_config_cls,
+                name=name,
+                emulator_config=emulator_config,
+                **helios_level,
+            )
 
-        if max_cost_value is not None:
-            emulator_options.setdefault("max_cost", max_cost_value)
         return _call_named_constructor(helios_emulator_cls, name=name, **emulator_options)
 
-    config_options = dict(options)
-    if max_cost_value is not None:
-        config_options["max_cost"] = max_cost_value
-    return _call_named_constructor(helios_config_cls, name=name, **config_options)
+    return _call_named_constructor(helios_config_cls, name=name, **options)
 
 
 def build_nexus_backend_config(
     cfg: NexusBackendConfig,
     *,
     n_qubits: int | None = None,
-    max_cost: float | None = None,
 ) -> Any:
     """Build a concrete qnexus backend config object for compile/execute jobs."""
 
@@ -170,5 +163,4 @@ def build_nexus_backend_config(
         name=name,
         options=options,
         n_qubits=n_qubits,
-        max_cost=max_cost,
     )
