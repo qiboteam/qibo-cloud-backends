@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 import inspect
 from typing import Any
+
+LOGGER = logging.getLogger(__name__)
 
 _SUPPORTED_PLATFORM_FAMILIES = {"hseries", "helios", "aer"}
 
@@ -42,7 +45,7 @@ def parse_platform(platform: str) -> tuple[str, str]:
     """Parse platform string in the form '<family>:<name>'."""
 
     if ":" not in platform:
-        print('Warning: Platform string missing family prefix. Assuming "hseries".')
+        LOGGER.warning('Platform string missing family prefix. Assuming "hseries".')
         return "hseries", platform
 
     family, raw_name = platform.split(":", 1)

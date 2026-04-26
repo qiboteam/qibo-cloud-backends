@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from .nexus_errors import NexusAuthError
+
+LOGGER = logging.getLogger(__name__)
 
 
 def authenticate(*, credential_login: bool | None) -> None:
@@ -22,7 +25,11 @@ def authenticate(*, credential_login: bool | None) -> None:
 
         # Headless default: rely on pre-configured token/session managed by qnexus.
         # Avoid forcing interactive login in automated environments.
-        print("Using pre-configured Nexus session/token. If this fails later, run 'python -c \"import qnexus as qnx; qnx.login()\"' to log in interactively or set 'credential_login=True' for credential-based login.")
+        LOGGER.info(
+            "Using pre-configured Nexus session/token. If this fails later, run "
+            "'python -c \"import qnexus as qnx; qnx.login()\"' to log in interactively "
+            "or set 'credential_login=True' for credential-based login."
+        )
         return
     except Exception as exc:
         raise NexusAuthError(f"Failed Nexus authentication: {exc}") from exc
