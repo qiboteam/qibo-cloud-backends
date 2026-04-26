@@ -161,3 +161,7 @@ cython_debug/
 *.iml
 .idea/
 .devenv
+
+# Personal slides / presentation artifacts (not part of the library)
+slides/
+.DS_Store
