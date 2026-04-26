@@ -122,7 +122,9 @@ class MetaBackend:
             return backend_class(verbosity=verbosity, token=token, **kwargs)
         elif client == "nexus-client":
             backend_class = _load_client_class(client)
-            return backend_class(platform=platform, **kwargs)
+            if platform is not None:
+                kwargs["platform"] = platform
+            return backend_class(**kwargs)
         else:
             raise_error(
                 ValueError,
