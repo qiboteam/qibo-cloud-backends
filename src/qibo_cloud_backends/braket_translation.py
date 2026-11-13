@@ -15,7 +15,12 @@ def to_braket(qibo_circuit: QiboCircuit, verbatim_circuit: bool) -> BraketCircui
         if isinstance(gate, qibo_gates.M):
             continue
 
-        circuit.add_instruction(Instruction(_translate_op(gate), gate.qubits))
+        translated = _translate_op(gate)
+
+        if isinstance(translated, Instruction):
+            circuit.add_instruction(translated)
+        else:
+            circuit.add_instruction(Instruction(translated, gate.qubits))
 
     # Add verbatim box
     if verbatim_circuit:
@@ -141,6 +146,27 @@ def _(g: qibo_gates.RY):
 @_translate_op.register
 def _(g: qibo_gates.RZ):
     return braket_gates.Rz(g.parameters[0])
+
+
+@_translate_op.register
+def _(g: qibo_gates.CRX):
+    return Instruction(
+        braket_gates.Rx(g.parameters[0]), g.qubits[1], control=g.qubits[0]
+    )
+
+
+@_translate_op.register
+def _(g: qibo_gates.CRY):
+    return Instruction(
+        braket_gates.Ry(g.parameters[0]), g.qubits[1], control=g.qubits[0]
+    )
+
+
+@_translate_op.register
+def _(g: qibo_gates.CRZ):
+    return Instruction(
+        braket_gates.Rz(g.parameters[0]), g.qubits[1], control=g.qubits[0]
+    )
 
 
 @_translate_op.register
